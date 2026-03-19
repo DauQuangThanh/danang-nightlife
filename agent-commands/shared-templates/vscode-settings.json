@@ -1,0 +1,14 @@
+{
+    "chat.promptFilesRecommendations": {
+        "nightlife.set-ground-rules": true,
+        "nightlife.specify": true,
+        "nightlife.architect": true,
+        "nightlife.design": true,
+        "nightlife.taskify": true,
+        "nightlife.implement": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        ".nightlife/scripts/python/": true
+    }
+}
+
