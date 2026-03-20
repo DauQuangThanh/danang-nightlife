@@ -99,9 +99,14 @@ Your AI agent should show these core commands:
 
 ### 2. Check Script Files
 
-The `.nightlife/scripts` directory should contain:
+Each command's scripts live inside the agent folder, e.g.:
 
-- ✅ Python scripts (`.py`) for cross-platform execution
+```bash
+ls .claude/commands/specify/scripts/    # Claude Code
+ls .github/agents/specify/scripts/     # GitHub Copilot
+```
+
+- ✅ Python scripts (`.py`) for cross-platform execution, one `scripts/` folder per command
 
 ---
 

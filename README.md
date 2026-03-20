@@ -109,7 +109,7 @@ nightlife check
   <img src="./media/danang-nightlife.png" alt="Danang Nightlife Installation" width="100%"/>
 </p>
 
-**Need to upgrade?** See the [Upgrade Guide](./docs/upgrade.md) or run:
+**Need to upgrade?** See the [Upgrade Guide](./docs/upgrade.md) or run (replaces agent command folders with timestamped backups):
 
 ```bash
 uv tool install nightlife-cli --force --from git+https://github.com/dauquangthanh/danang-nightlife.git
@@ -566,22 +566,17 @@ The produced specification should contain a set of user stories and functional r
 At this stage, your project folder contents should resemble the following:
 
 ```text
-└── .nightlife
-    ├── memory
-    │  └── ground-rules.md
-    ├── scripts
-    │  ├── check-prerequisites.py
-    │  ├── common.py
-    │  ├── create-new-feature.py
-    │  ├── setup-plan.py
-    │  └── update-claude-md.py
-    ├── specs
-    │  └── 001-create-taskify
-    │      └── spec.md
-    └── templates
-        ├── plan-template.md
-        ├── spec-template.md
-        └── tasks-template.md
+├── .<agent-folder>/               # e.g., .claude/commands/
+│   ├── nightlife.specify.md
+│   ├── specify/
+│   │   ├── spec-template.md
+│   │   └── scripts/
+│   │       ├── common.py
+│   │       └── create-new-feature.py
+│   └── ... (other commands)
+└── specs/
+    └── 001-create-taskify/
+        └── spec.md
 ```
 
 #### **STEP 3:** Functional specification clarification (required before planning)
@@ -631,8 +626,8 @@ The output of this step will include a number of implementation detail documents
 ├── docs/
 │  └── ground-rules.md
 ├── specs/
-│  └── 001-create-taskify
-│      ├── contracts
+│  └── 001-create-taskify/
+│      ├── contracts/
 │      │  ├── api-spec.json
 │      │  └── signalr-spec.md
 │      ├── data-model.md
@@ -640,20 +635,12 @@ The output of this step will include a number of implementation detail documents
 │      ├── quickstart.md
 │      ├── research.md
 │      └── spec.md
-└── .nightlife/
-    ├── scripts/
-    └── templates/
-        ├── set-ground-rules/
-        │   ├── ground-rules-template.md
-        │   ├── design-template.md
-        │   ├── spec-template.md
-        │   └── tasks-template.md
-        ├── specify/
-        │   └── spec-template.md
-        ├── design/
-        │   └── design-template.md
-        └── taskify/
-            └── tasks-template.md
+└── .<agent-folder>/               # e.g., .claude/commands/
+    ├── nightlife.*.md             # Slash commands
+    ├── <cmd-name>/                # Per-command templates + scripts
+    │   ├── *-template.md
+    │   └── scripts/
+    └── shared-templates/
 ```
 
 Check the `research.md` document to ensure that the right tech stack is used, based on your instructions. You can ask Claude Code to refine it if any of the components stand out, or even have it check the locally-installed version of the platform/framework you want to use (e.g., .NET).
@@ -857,13 +844,13 @@ After running `nightlife init`, your project will have the following structure:
 
 ```
 <project-root>/
-├── .nightlife/               # Core framework (auto-generated, managed by Nightlife CLI)
-│   ├── docs/            # Project principles and ground rules
-│   ├── scripts/           # Automation scripts (Python)
-│   └── templates/         # Reusable templates for specs, plans, and tasks
-│
-├── .<agent-folder>/       # Agent-specific commands (e.g., .claude/commands/, .github/agents/ or .github/prompts/)
-│   └── nightlife.*.md       # 15 Nightlife slash commands for your AI agent
+├── .<agent-folder>/       # Agent commands (self-contained, managed by Nightlife CLI)
+│   │                      # e.g., .claude/commands/, .github/agents/, .cursor/commands/
+│   ├── nightlife.*.md     # 15 Nightlife slash commands for your AI agent
+│   ├── <cmd-name>/        # Per-command templates and scripts
+│   │   ├── *-template.md  # Command-specific templates
+│   │   └── scripts/       # Command automation scripts (Python)
+│   └── shared-templates/  # Shared assets used across commands
 │
 └── specs/                 # Your feature specifications (created as you work)
     └── <feature-name>/
@@ -875,11 +862,10 @@ After running `nightlife init`, your project will have the following structure:
 
 **Key Folders:**
 
-- **`.nightlife/`** - Framework core (memory, scripts, templates)
-- **`.<agent>/commands/`** - AI agent slash commands (`.claude/`, `.github/agents/` or `.github/prompts/`, etc.)
+- **`.<agent>/`** - AI agent commands, templates, and scripts — fully self-contained (`.claude/`, `.github/agents/`, `.cursor/commands/`, etc.)
 - **`specs/`** - Your feature specifications (grows as you build)
 
-**Note:** The `.nightlife/` folder and agent-specific folders are auto-managed by the Nightlife CLI. You primarily work in `specs/` for your features.
+**Note:** Agent folders are auto-managed by the Nightlife CLI. You primarily work in `specs/` for your features.
 
 ---
 

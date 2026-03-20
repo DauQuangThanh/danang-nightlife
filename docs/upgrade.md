@@ -50,11 +50,10 @@ When Danang Nightlife releases new features (like new slash commands or updated 
 
 Running `nightlife init --here --force --upgrade` will automatically back up and replace:
 
-- ✅ **.nightlife/ folder** (scripts, templates, memory files including docs/)
-- ✅ **Agent folders** (e.g., .claude/, .github/, .cursor/) - entire root folders are backed up and replaced
+- ✅ **Agent folders** (e.g., .claude/, .github/, .cursor/) — entire root folders are backed up and replaced (commands, per-command templates, and scripts are all self-contained inside these folders)
 - ✅ **Skills folder** (for Jules agent) - backed up if present
 
-**Automatic backups are created with timestamps** (e.g., `.nightlife.backup.20260204_120000`). User project files (specs/, source code, etc.) are preserved and never touched.
+**Automatic backups are created with timestamps** (e.g., `.claude.backup.20260204_120000`). User project files (specs/, source code, etc.) are preserved and never touched.
 
 ### What stays safe?
 
@@ -87,9 +86,9 @@ nightlife init --here --force --upgrade --ai copilot
 
 The `--upgrade` flag enables upgrade mode, which:
 
-- Detects existing Nightlife installation (.nightlife folder required)
-- Automatically backs up folders with timestamps
-- Replaces .nightlife, agent folders, and skills (for Jules) with latest templates
+- Detects existing Nightlife installation (looks for `nightlife.*` files in known agent folders)
+- Automatically backs up agent root folders with timestamps (e.g., `.claude.backup.20260204_120000`)
+- Replaces agent folders and skills (for Jules) with latest templates
 - Preserves user content (specs/, source code, git history)
 
 ---
@@ -98,34 +97,24 @@ The `--upgrade` flag enables upgrade mode, which:
 
 ### 1. Automatic backups are created
 
-The upgrade process automatically creates timestamped backups of replaced folders (e.g., `.nightlife.backup.20260204_120000`). To restore from backup:
+The upgrade process automatically creates timestamped backups of replaced agent root folders (e.g., `.claude.backup.20260204_120000`, `.github.backup.20260204_120000`). To restore from backup:
 
 ```bash
 # List backup folders
 ls -la | grep backup
 
-# Remove current folder and rename backup (example)
-rm -rf .nightlife
-mv .nightlife.backup.20260204_120000 .nightlife
+# Remove current folder and rename backup (example for Claude)
+rm -rf .claude
+mv .claude.backup.20260204_120000 .claude
 ```
 
-### 2. Ground rules file may be overwritten
+### 2. Ground rules file
 
-**Known issue:** The upgrade replaces the entire `docs/` folder within `.nightlife`, which may overwrite `docs/ground-rules.md` with the default template, erasing any customizations.
-
-**Workaround:** After upgrade, restore from backup or git:
-
-```bash
-# If you committed before upgrading
-git restore docs/ground-rules.md
-
-# Or from automatic backup
-cp .nightlife.backup.*/docs/ground-rules.md docs/
-```
+The `docs/ground-rules.md` file lives in your project root (not inside any agent folder) and is **never touched** by upgrades. Your customizations are always preserved.
 
 ### 3. Custom template modifications
 
-If you customized templates in `.nightlife/templates/`, the upgrade will replace them. Restore from backup after upgrading.
+Per-command templates (e.g., `spec-template.md`, `design-template.md`) live inside each agent folder (e.g., `.claude/commands/specify/`). The upgrade replaces these along with the agent folder. Restore from the timestamped backup if needed.
 
 ### 3. Duplicate slash commands (IDE-based agents)
 
@@ -161,23 +150,19 @@ uv tool install nightlife-cli --force --from git+https://github.com/dauquangthan
 
 # Update project files to get new commands (automatic backups created)
 nightlife init --here --force --upgrade --ai copilot
-
-# Restore ground rules if customized (from automatic backup)
-cp .nightlife.backup.*/docs/ground-rules.md docs/
 ```
 
-### Scenario 2: "I customized templates and ground-rules"
+### Scenario 2: "I customized templates"
 
 ```bash
 # Upgrade CLI
 uv tool install nightlife-cli --force --from git+https://github.com/dauquangthanh/danang-nightlife.git
 
-# Update project (automatic backups created)
+# Update project (automatic backups created, e.g., .github.backup.TIMESTAMP)
 nightlife init --here --force --upgrade --ai copilot
 
-# Restore customizations from automatic backups
-cp .nightlife.backup.*/docs/ground-rules.md docs/
-cp -r .nightlife.backup.*/templates .nightlife/
+# Restore customized templates from backup
+cp -r .github.backup.*/agents/specify .github/agents/
 # Manually merge template changes if needed
 ```
 
@@ -203,11 +188,8 @@ rm nightlife.old-command-name.md
 If you initialized your project with `--no-git`, you can still upgrade:
 
 ```bash
-# Run upgrade (automatic backups created)
+# Run upgrade (automatic backups created, e.g., .claude.backup.TIMESTAMP)
 nightlife init --here --force --upgrade --ai copilot --no-git
-
-# Restore customizations from automatic backups
-cp .nightlife.backup.*/docs/ground-rules.md docs/
 ```
 
 The `--no-git` flag skips git initialization but doesn't affect file updates.
@@ -285,17 +267,11 @@ This tells Danang Nightlife which feature directory to use when creating specs, 
 
 ### "I lost my ground rules customizations"
 
-**Fix:** Restore from automatic backup:
+`docs/ground-rules.md` lives in your project root and is **never overwritten** by upgrades — it is not part of any agent folder. If the file is missing, restore from git:
 
 ```bash
-# List backups
-ls -la | grep backup
-
-# Restore ground rules
-cp .nightlife.backup.20260204_120000/docs/ground-rules.md docs/
+git restore docs/ground-rules.md
 ```
-
-**Prevention:** Commit `docs/ground-rules.md` before upgrading if using git.
 
 ### "Warning: Current directory is not empty"
 
@@ -319,10 +295,8 @@ This warning appears when you run `nightlife init --here` (or `nightlife init .`
 
 Only Danang Nightlife infrastructure files:
 
-- Agent command files (`.claude/commands/`, `.github/prompts/`, etc.)
-- Scripts in `.nightlife/scripts/`
-- Templates in `.nightlife/templates/`
-- Memory files in `docs/` (including ground-rules)
+- Agent command files, per-command templates, and scripts inside agent folders (`.claude/commands/`, `.github/agents/`, etc.)
+- Skills folder (Jules only)
 
 **What stays untouched:**
 

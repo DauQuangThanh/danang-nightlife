@@ -118,14 +118,16 @@ nightlife-dev --help
 
 ### 5. Check Script Files
 
-After running `init`, verify Python scripts are present:
+After running `init`, verify Python scripts are present inside the agent command folders:
 
 ```bash
-ls -l scripts | grep .py
-# Expect: -rw-r--r-- (Python scripts don't need execute permissions)
+# Example for Claude Code
+ls -l .claude/commands/specify/scripts/
+ls -l .claude/commands/design/scripts/
+# Expect .py files in each command's scripts/ subdirectory
 ```
 
-> **Note:** Python scripts work cross-platform without special permissions.
+> **Note:** Python scripts are self-contained per command and work cross-platform without special permissions.
 
 ---
 
@@ -182,11 +184,11 @@ danang-nightlife/
 ├── pyproject.toml          # Python project configuration
 ├── README.md               # Main project documentation
 ├── agent-commands/         # Slash command definitions (one folder per command)
-│   ├── set-ground-rules/   # Each folder has command.md + its templates
+│   ├── set-ground-rules/   # Each folder has: command.md + templates + scripts/
 │   ├── specify/
 │   ├── design/
 │   ├── architect/
-│   └── shared-templates/   # Shared templates (agent-file, vscode settings)
+│   └── shared-templates/   # Shared assets (agent-file template, vscode settings)
 ├── docs/                   # Documentation site (DocFX)
 │   ├── index.md
 │   ├── installation.md
@@ -201,11 +203,12 @@ danang-nightlife/
 │   ├── agent-skills-folder-mapping.md
 │   ├── agents-creation-rules.md
 │   └── agents-folder-mapping.md
-├── scripts/                # Automation scripts (Python)
+├── scripts/                # Empty (scripts now live inside each agent-commands/<cmd>/scripts/)
 ├── skills/                 # Reusable skill modules (copied to agent skills folders)
-│   ├── bug-analysis/
-│   ├── git-commit/
-│   └── ... (additional skills)
+│   ├── general-coding/
+│   ├── general-bug-analysis/
+│   ├── healthcare-coding/
+│   └── ... (general-* and healthcare-* skills)
 ├── src/nightlife_cli/        # CLI source code
 └── .github/                # GitHub configurations
     ├── copilot-instructions.md  # Copilot guidelines
