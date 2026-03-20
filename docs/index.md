@@ -1,4 +1,4 @@
-# 🌅 Danang Nightlife
+# 🌌 Danang Nightlife
 
 ## *Build Better Software with AI-Powered Specifications*
 
