@@ -7,6 +7,7 @@ on:
       - 'scripts/**'
       - 'agent-commands/**'
       - 'skills/**'
+      - 'src/**'
       - '.github/workflows/**'
   workflow_dispatch:
 

@@ -419,7 +419,7 @@ def download_and_extract_template(
                         console.print(f"[cyan]Extracted {len(extracted_items)} items to temp location[/cyan]")
 
                     source_dir = temp_path
-                    if len(extracted_items) == 1 and extracted_items[0].is_dir():
+                    if len(extracted_items) == 1 and extracted_items[0].is_dir() and not extracted_items[0].name.startswith('.'):
                         source_dir = extracted_items[0]
                         if tracker:
                             tracker.add("flatten", "Flatten nested directory")
@@ -470,7 +470,7 @@ def download_and_extract_template(
 
                     # Handle nested directory structure
                     source_dir = temp_path
-                    if len(extracted_items) == 1 and extracted_items[0].is_dir():
+                    if len(extracted_items) == 1 and extracted_items[0].is_dir() and not extracted_items[0].name.startswith('.'):
                         source_dir = extracted_items[0]
                         if tracker:
                             tracker.add("flatten", "Flatten nested directory")
