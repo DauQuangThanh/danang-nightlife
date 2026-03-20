@@ -8,7 +8,7 @@
         "nightlife.implement": true
     },
     "chat.tools.terminal.autoApprove": {
-        ".nightlife/scripts/python/": true
+        ".github/agents/": true
     }
 }
 

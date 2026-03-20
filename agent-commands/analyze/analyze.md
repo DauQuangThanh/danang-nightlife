@@ -6,7 +6,7 @@ handoffs:
     prompt: Start the implementation in phases
     send: true
 scripts:
-   py: python scripts/python/check-prerequisites.py --json --require-tasks --include-tasks
+   py: python scripts/check-prerequisites.py --json --require-tasks --include-tasks
 ---
 
 ## User Input

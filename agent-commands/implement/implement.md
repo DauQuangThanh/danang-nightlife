@@ -10,7 +10,7 @@ handoffs:
     prompt: Execute E2E test scripts to verify the implementation
     send: true
 scripts:
-   py: python scripts/python/check-prerequisites.py --json --require-tasks --include-tasks
+   py: python scripts/check-prerequisites.py --json --require-tasks --include-tasks
 ---
 
 ## User Input

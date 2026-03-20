@@ -14,7 +14,7 @@ handoffs:
     prompt: Create a detailed design for the spec. I am building...
     send: false
 scripts:
-   py: python scripts/python/create-new-feature.py --json "{ARGS}"
+   py: python scripts/create-new-feature.py --json "{ARGS}"
 ---
 
 ## User Input
@@ -77,7 +77,7 @@ Given that feature description, do this:
    - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
 
-3. Load `.nightlife/templates/specify/spec-template.md` to understand required sections.
+3. Load `specify/spec-template.md` to understand required sections.
 
 4. **Load product-level context (if available)**:
    - Read `docs/architecture.md` (if exists) to understand technology stack, architectural patterns, and quality requirements

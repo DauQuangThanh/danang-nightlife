@@ -18,10 +18,10 @@ if TYPE_CHECKING:
     from .ui import StepTracker
 
 
-def _process_command_content(content: str, ai_assistant: str, script_type: str = "py") -> str:
+def _process_command_content(content: str, ai_assistant: str, agent_folder: str, cmd_name: str = "", script_type: str = "py") -> str:
     """Process a command file's content: extract script commands from frontmatter,
     replace {SCRIPT}/{AGENT_SCRIPT} placeholders, strip script sections from
-    frontmatter, and rewrite scripts/ paths to .nightlife/scripts/.
+    frontmatter, and rewrite scripts/ paths to [agent_folder]/[cmd_name]/scripts/.
 
     This mirrors what create-release-packages.sh's generate_commands() does
     for release builds, ensuring local template installs produce identical output.
@@ -29,9 +29,13 @@ def _process_command_content(content: str, ai_assistant: str, script_type: str =
     # Normalize line endings
     content = content.replace('\r\n', '\n').replace('\r', '\n')
 
+    # Scripts live inside the per-command subfolder: [agent_folder]/[cmd_name]/scripts/
+    scripts_dest = f"{agent_folder}/{cmd_name}/scripts/" if cmd_name else f"{agent_folder}/scripts/"
+
     def _rewrite_script_paths(text: str) -> str:
-        text = text.replace('scripts/', '.nightlife/scripts/')
-        text = text.replace('.nightlife/.nightlife/scripts/', '.nightlife/scripts/')
+        text = text.replace('scripts/', scripts_dest)
+        # Prevent double-prefixing if content was already processed
+        text = text.replace(f"{agent_folder}/{scripts_dest}", scripts_dest)
         return text
 
     # Check if file has YAML frontmatter
@@ -47,7 +51,7 @@ def _process_command_content(content: str, ai_assistant: str, script_type: str =
     frontmatter = parts[1]
     body = parts[2]
 
-    # Extract script command from frontmatter (e.g., "scripts:\n   py: python scripts/python/...")
+    # Extract script command from frontmatter (e.g., "scripts:\n   py: python scripts/check-prerequisites.py ...")
     script_command = ''
     script_match = re.search(
         r'^scripts:\s*\n\s+' + re.escape(script_type) + r':\s*(.+)$',
@@ -97,7 +101,7 @@ def _process_command_content(content: str, ai_assistant: str, script_type: str =
     # Reassemble with frontmatter
     result = '---\n' + cleaned_frontmatter + '---\n' + body
 
-    # Rewrite scripts/ paths to .nightlife/scripts/ (avoid double-prefixing)
+    # Rewrite scripts/ paths to [agent_folder]/scripts/ (avoid double-prefixing)
     result = _rewrite_script_paths(result)
 
     return result
@@ -184,9 +188,13 @@ def copy_local_template(
 ) -> Path:
     """Copy local template files to the project directory.
 
+    Each agent is self-contained: command files, templates, scripts, and shared
+    assets all land inside the agent-specific folder. No .nightlife/ folder is
+    created or required.
+
     Args:
-        is_first_agent: If True, copies shared .nightlife folder. If False, skips it.
-                       This prevents redundant copying when multiple AI assistants are selected.
+        is_first_agent: Kept for API compatibility but no longer affects behaviour
+                        since every agent folder is independently self-contained.
     """
 
     # Paths to copy
@@ -216,80 +224,60 @@ def copy_local_template(
     agent_ext = EXTENSION_MAP.get(ai_assistant, ".md")
     args_format = ARGS_FORMAT_MAP.get(ai_assistant, "$ARGUMENTS")
 
-    # Only copy shared .nightlife folder for the first AI assistant
-    # This prevents redundant copying when multiple AI assistants are selected
-    if is_first_agent:
-        # Create .nightlife directory structure
-        sunrise_dir = project_path / ".nightlife"
-        sunrise_dir.mkdir(exist_ok=True)
-
-        # Copy scripts (filter by script_type)
-        if scripts_dir.exists():
-            dest_scripts = sunrise_dir / "scripts"
-            dest_scripts.mkdir(exist_ok=True)
-
-            # Copy common files
-            for item in scripts_dir.iterdir():
-                if item.is_file():
-                    shutil.copy2(item, dest_scripts / item.name)
-
-            # Copy script variant directory
-            if script_type == "py" and (scripts_dir / "python").exists():
-                shutil.copytree(scripts_dir / "python", dest_scripts / "python", dirs_exist_ok=True)
-
-            if verbose and not tracker:
-                console.print(f"[green]✓[/green] Copied scripts ({script_type})")
-
-        # Copy templates to .nightlife/templates with subdirectories
-        dest_templates = sunrise_dir / "templates"
-        dest_templates.mkdir(exist_ok=True)
-
-        # Copy template files from each agent-commands/<command>/ subfolder
-        # into .nightlife/templates/<command>/ (excluding the command .md itself)
-        for cmd_subdir in commands_dir.iterdir():
-            if cmd_subdir.is_dir():
-                template_files = [f for f in cmd_subdir.iterdir()
-                                  if f.is_file() and f.name != f"{cmd_subdir.name}.md"]
-                if template_files:
-                    dest_cmd_dir = dest_templates / cmd_subdir.name
-                    dest_cmd_dir.mkdir(exist_ok=True)
-                    for tmpl in template_files:
-                        shutil.copy2(tmpl, dest_cmd_dir / tmpl.name)
-
-        if verbose and not tracker:
-            console.print(f"[green]✓[/green] Copied templates")
-
-    # Create agent-specific command directory
+    # Create agent-specific command directory.
     # Note: Multiple agents can share the same agent_folder (e.g., Auggie CLI, SHAI).
     # Using exist_ok=True allows peaceful coexistence - each agent's commands are
     # prefixed with "nightlife." and use agent-specific extensions, preventing conflicts.
     agent_path = project_path / agent_folder
     agent_path.mkdir(parents=True, exist_ok=True)
 
-    # Copy command files to agent directory
-    if commands_dir.exists():
-        for cmd_subdir in commands_dir.iterdir():
-            if not cmd_subdir.is_dir():
+    # Copy command files, their per-command templates, and shared-templates
+    # into the agent directory. Layout:
+    #   [agent_folder]/nightlife.<cmd>.<ext>       ← command file
+    #   [agent_folder]/<cmd>/<template-file>        ← command-specific templates
+    #   [agent_folder]/shared-templates/<file>      ← shared assets (e.g. agent-file-template.md)
+    for cmd_subdir in commands_dir.iterdir():
+        if not cmd_subdir.is_dir():
+            continue
+
+        # shared-templates: copy all non-JSON assets to [agent_folder]/shared-templates/
+        if cmd_subdir.name == "shared-templates":
+            dest_shared = agent_path / "shared-templates"
+            dest_shared.mkdir(exist_ok=True)
+            for f in cmd_subdir.iterdir():
+                if f.is_file() and f.name != "vscode-settings.json":
+                    shutil.copy2(f, dest_shared / f.name)
+            continue
+
+        cmd_file = cmd_subdir / f"{cmd_subdir.name}.md"
+        if not cmd_file.exists():
+            continue
+
+        # Read and process the command file
+        content = cmd_file.read_text()
+        content = _process_command_content(content, ai_assistant, agent_folder, cmd_subdir.name)
+        content = content.replace("{ARGS}", args_format)
+        content = content.replace("$ARGUMENTS", args_format)
+        content = content.replace("__AGENT__", ai_assistant)
+
+        # Write to agent directory with appropriate extension
+        output_file = agent_path / f"nightlife.{cmd_file.stem}{agent_ext}"
+        output_file.write_text(content)
+
+        # Copy per-command template files AND subdirectories (e.g. scripts/) into
+        # [agent_folder]/<cmd>/ so agent files can reference them with relative paths
+        dest_tmpl_dir = agent_path / cmd_subdir.name
+        any_cmd_content = False
+        for item in cmd_subdir.iterdir():
+            if item.name == f"{cmd_subdir.name}.md":
                 continue
-            cmd_file = cmd_subdir / f"{cmd_subdir.name}.md"
-            if not cmd_file.exists():
-                continue
-
-            # Read the command file
-            content = cmd_file.read_text()
-
-            # Process frontmatter: extract script commands, replace {SCRIPT}/{AGENT_SCRIPT},
-            # strip script sections, and rewrite scripts/ paths
-            content = _process_command_content(content, ai_assistant)
-
-            # Replace placeholders
-            content = content.replace("{ARGS}", args_format)
-            content = content.replace("$ARGUMENTS", args_format)
-            content = content.replace("__AGENT__", ai_assistant)
-
-            # Write to agent directory with appropriate extension
-            output_file = agent_path / f"nightlife.{cmd_file.stem}{agent_ext}"
-            output_file.write_text(content)
+            if not any_cmd_content:
+                dest_tmpl_dir.mkdir(exist_ok=True)
+                any_cmd_content = True
+            if item.is_file():
+                shutil.copy2(item, dest_tmpl_dir / item.name)
+            elif item.is_dir():
+                shutil.copytree(item, dest_tmpl_dir / item.name, dirs_exist_ok=True)
 
     if verbose and not tracker:
         console.print(f"[green]✓[/green] Created {ai_assistant} commands in {agent_folder}")
@@ -310,10 +298,8 @@ def copy_local_template(
         if verbose and not tracker:
             console.print(f"[green]✓[/green] Created {ai_assistant} skills in {skills_folder}")
 
-    # 
-    # Handle agent-specific files (e.g., vscode-settings.json for copilot)
+    # Handle agent-specific extras (e.g., vscode-settings.json for Copilot)
     if ai_assistant == "copilot":
-        # Create .vscode/settings.json
         vscode_dir = project_path / ".vscode"
         vscode_dir.mkdir(exist_ok=True)
         vscode_settings_src = commands_dir / "shared-templates" / "vscode-settings.json"

@@ -29,35 +29,40 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "$GENRELEASES_DIR"/* || true
 
 rewrite_paths() {
-  # Only rewrite scripts/ paths. Template references in command files already
-  # use the correct .nightlife/templates/ prefix, so rewriting templates/ would
-  # corrupt them to .nightlife.nightlife/templates/.
+  # Rewrite bare scripts/ references to [agent_folder]/[cmd_name]/scripts/ so paths
+  # are relative to the project root and self-contained within each command folder.
+  local agent_folder="$1"
+  local cmd_name="$2"
   sed -E \
-    -e 's@(/?)scripts/@.nightlife/scripts/@g'
+    -e "s@(/?)scripts/@${agent_folder}/${cmd_name}/scripts/@g"
 }
 
 generate_commands() {
-  local agent=$1 ext=$2 arg_format=$3 output_dir=$4 script_variant=$5
+  local agent=$1 ext=$2 arg_format=$3 output_dir=$4 script_variant=$5 agent_folder=$6
   mkdir -p "$output_dir"
   for cmd_dir in agent-commands/*/; do
     [[ -d "$cmd_dir" ]] || continue
     local name description script_command agent_script_command body
     name=$(basename "$cmd_dir")
+
+    # Skip shared-templates — handled separately in build_variant
+    [[ "$name" == "shared-templates" ]] && continue
+
     local template="$cmd_dir/$name.md"
     [[ -f "$template" ]] || continue
-    
+
     # Normalize line endings
     file_content=$(tr -d '\r' < "$template")
-    
+
     # Extract description and script command from YAML frontmatter
     description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
     script_command=$(printf '%s\n' "$file_content" | awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}')
-    
+
     if [[ -z $script_command ]]; then
       echo "Warning: no script command found for $script_variant in $template" >&2
       script_command="(Missing script command for $script_variant)"
     fi
-    
+
     # Extract agent_script command from YAML frontmatter if present
     agent_script_command=$(printf '%s\n' "$file_content" | awk '
       /^agent_scripts:$/ { in_agent_scripts=1; next }
@@ -68,15 +73,15 @@ generate_commands() {
       }
       in_agent_scripts && /^[a-zA-Z]/ { in_agent_scripts=0 }
     ')
-    
+
     # Replace {SCRIPT} placeholder with the script command
     body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
-    
+
     # Replace {AGENT_SCRIPT} placeholder with the agent script command if found
     if [[ -n $agent_script_command ]]; then
       body=$(printf '%s\n' "$body" | sed "s|{AGENT_SCRIPT}|${agent_script_command}|g")
     fi
-    
+
     # Remove the scripts: and agent_scripts: sections from frontmatter while preserving YAML structure
     body=$(printf '%s\n' "$body" | awk '
       /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
@@ -86,10 +91,10 @@ generate_commands() {
       in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
       { print }
     ')
-    
-    # Apply other substitutions
-    body=$(printf '%s\n' "$body" | sed "s/{ARGS}/$arg_format/g" | sed "s/__AGENT__/$agent/g" | rewrite_paths)
-    
+
+    # Apply other substitutions and rewrite scripts/ paths
+    body=$(printf '%s\n' "$body" | sed "s/{ARGS}/$arg_format/g" | sed "s/__AGENT__/$agent/g" | rewrite_paths "$agent_folder" "$name")
+
     case $ext in
       toml)
         body=$(printf '%s\n' "$body" | sed 's/\\/\\\\/g')
@@ -99,7 +104,39 @@ generate_commands() {
       agent.md)
         echo "$body" > "$output_dir/nightlife.$name.$ext" ;;
     esac
+
+    # Copy per-command template files AND subdirectories (e.g. scripts/) alongside
+    # the command file so agent files can reference them with relative paths.
+    local has_cmd_content=false
+    for item in "$cmd_dir"*; do
+      [[ -e "$item" ]] || continue
+      [[ "$(basename "$item")" == "$name.md" ]] && continue
+      has_cmd_content=true
+      break
+    done
+    if $has_cmd_content; then
+      mkdir -p "$output_dir/$name"
+      for item in "$cmd_dir"*; do
+        [[ -e "$item" ]] || continue
+        [[ "$(basename "$item")" == "$name.md" ]] && continue
+        if [[ -f "$item" ]]; then
+          cp "$item" "$output_dir/$name/"
+        elif [[ -d "$item" ]]; then
+          cp -r "$item" "$output_dir/$name/"
+        fi
+      done
+    fi
   done
+
+  # Copy shared-templates assets (e.g. agent-file-template.md) into the agent folder
+  if [[ -d "agent-commands/shared-templates" ]]; then
+    mkdir -p "$output_dir/shared-templates"
+    for f in agent-commands/shared-templates/*; do
+      [[ -f "$f" ]] || continue
+      [[ "$(basename "$f")" == "vscode-settings.json" ]] && continue
+      cp "$f" "$output_dir/shared-templates/"
+    done
+  fi
 }
 
 generate_skills() {
@@ -122,76 +159,36 @@ build_variant() {
   local base_dir="$GENRELEASES_DIR/sdd-${agent}-package"
   echo "Building $agent package..."
   mkdir -p "$base_dir"
-  
-  # Copy base structure but filter scripts by variant
-  SPEC_DIR="$base_dir/.nightlife"
-  mkdir -p "$SPEC_DIR"
-  
-  [[ -d memory ]] && { cp -r memory "$SPEC_DIR/"; echo "Copied memory -> .nightlife"; }
-  
-   # Only copy the python script variant directory
-   if [[ -d scripts ]]; then
-     mkdir -p "$SPEC_DIR/scripts"
-     [[ -d scripts/python ]] && { cp -r scripts/python "$SPEC_DIR/scripts/"; echo "Copied scripts/python -> .nightlife/scripts"; }
-     # Copy any script files that aren't in variant-specific directories
-     find scripts -maxdepth 1 -type f -exec cp {} "$SPEC_DIR/scripts/" \; 2>/dev/null || true
-   fi
-  
-  # Copy template files from each agent-commands/<command>/ subfolder
-  # into .nightlife/templates/<command>/ (excluding the command .md itself)
-  mkdir -p "$SPEC_DIR/templates"
-  for cmd_dir in agent-commands/*/; do
-    [[ -d "$cmd_dir" ]] || continue
-    local cmd_name=$(basename "$cmd_dir")
-    [[ "$cmd_name" == "shared-templates" ]] && {
-      # Copy shared templates into .nightlife/templates/shared-templates/
-      mkdir -p "$SPEC_DIR/templates/shared-templates"
-      find "$cmd_dir" -type f -not -name "vscode-settings.json" -exec cp {} "$SPEC_DIR/templates/shared-templates/" \;
-      continue
-    }
-    # Copy non-command template files (skip the command .md itself)
-    local has_templates=false
-    for tmpl_file in "$cmd_dir"*; do
-      [[ -f "$tmpl_file" ]] || continue
-      [[ "$(basename "$tmpl_file")" == "$cmd_name.md" ]] && continue
-      has_templates=true
-      break
-    done
-    if $has_templates; then
-      mkdir -p "$SPEC_DIR/templates/$cmd_name"
-      for tmpl_file in "$cmd_dir"*; do
-        [[ -f "$tmpl_file" ]] || continue
-        [[ "$(basename "$tmpl_file")" == "$cmd_name.md" ]] && continue
-        cp "$tmpl_file" "$SPEC_DIR/templates/$cmd_name/"
-      done
-    fi
-  done
-  echo "Copied command templates -> .nightlife/templates/"
-  
+
+  # NOTE: No .nightlife/ folder is created. Each agent package is self-contained:
+  # command files, per-command templates, shared assets, and scripts all live
+  # inside the agent-specific folder.
+  #
   # NOTE: We substitute {ARGS} internally. Outward tokens differ intentionally:
-  #   * Markdown/prompt (claude, copilot, cursor-agent, opencode): $ARGUMENTS
+  #   * Markdown/prompt (claude, copilot, cursor-agent, opencode, ...): $ARGUMENTS
   #   * TOML (gemini, qwen): {{args}}
   # This keeps formats readable without extra abstraction.
 
   case $agent in
     claude)
       mkdir -p "$base_dir/.claude/commands"
-      generate_commands claude md "\$ARGUMENTS" "$base_dir/.claude/commands" "py"
-      generate_skills claude "$base_dir/.claude/skills" ;; 
+      generate_commands claude md "\$ARGUMENTS" "$base_dir/.claude/commands" "py" ".claude/commands"
+      generate_skills claude "$base_dir/.claude/skills" ;;
     gemini)
       mkdir -p "$base_dir/.gemini/commands"
-      generate_commands gemini toml "{{args}}" "$base_dir/.gemini/commands" "py"
+      generate_commands gemini toml "{{args}}" "$base_dir/.gemini/commands" "py" ".gemini/commands"
       generate_skills gemini "$base_dir/.gemini/extensions"
       [[ -f agent_templates/gemini/GEMINI.md ]] && cp agent_templates/gemini/GEMINI.md "$base_dir/GEMINI.md" ;;
     copilot)
       mkdir -p "$base_dir/.github/agents"
       mkdir -p "$base_dir/.github/prompts"
-      generate_commands copilot agent.md "\$ARGUMENTS" "$base_dir/.github/agents" "py"
-      # Also generate prompts for slash commands
+      generate_commands copilot agent.md "\$ARGUMENTS" "$base_dir/.github/agents" "py" ".github/agents"
+      # Also generate prompts for slash commands (reuses same agent_folder for script rewriting)
       for cmd_dir in agent-commands/*/; do
          [[ -d "$cmd_dir" ]] || continue
          local name file_content description script_command agent_script_command body
          name=$(basename "$cmd_dir")
+         [[ "$name" == "shared-templates" ]] && continue
          local template="$cmd_dir/$name.md"
          [[ -f "$template" ]] || continue
          file_content=$(tr -d '\r' < "$template")
@@ -217,7 +214,7 @@ build_variant() {
            in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
            { print }
          ')
-         body=$(printf '%s\n' "$body" | sed "s/{ARGS}/\$ARGUMENTS/g" | sed "s/__AGENT__/copilot/g" | rewrite_paths)
+         body=$(printf '%s\n' "$body" | sed "s/{ARGS}/\$ARGUMENTS/g" | sed "s/__AGENT__/copilot/g" | rewrite_paths ".github/agents" "$name")
          echo "$body" > "$base_dir/.github/prompts/nightlife.$name.prompt.md"
        done
       generate_skills copilot "$base_dir/.github/skills"
@@ -227,68 +224,68 @@ build_variant() {
       ;;
     cursor-agent)
       mkdir -p "$base_dir/.cursor/commands"
-      generate_commands cursor-agent md "\$ARGUMENTS" "$base_dir/.cursor/commands" "py"
+      generate_commands cursor-agent md "\$ARGUMENTS" "$base_dir/.cursor/commands" "py" ".cursor/commands"
       generate_skills cursor-agent "$base_dir/.cursor/rules" ;;
     qwen)
       mkdir -p "$base_dir/.qwen/commands"
-      generate_commands qwen toml "{{args}}" "$base_dir/.qwen/commands" "py"
+      generate_commands qwen toml "{{args}}" "$base_dir/.qwen/commands" "py" ".qwen/commands"
       generate_skills qwen "$base_dir/.qwen/skills"
       [[ -f agent_templates/qwen/QWEN.md ]] && cp agent_templates/qwen/QWEN.md "$base_dir/QWEN.md" ;;
     opencode)
       mkdir -p "$base_dir/.opencode/command"
-      generate_commands opencode md "\$ARGUMENTS" "$base_dir/.opencode/command" "py"
+      generate_commands opencode md "\$ARGUMENTS" "$base_dir/.opencode/command" "py" ".opencode/command"
       generate_skills opencode "$base_dir/.opencode/skill" ;;
     windsurf)
       mkdir -p "$base_dir/.windsurf/workflows"
-      generate_commands windsurf md "\$ARGUMENTS" "$base_dir/.windsurf/workflows" "py"
+      generate_commands windsurf md "\$ARGUMENTS" "$base_dir/.windsurf/workflows" "py" ".windsurf/workflows"
       generate_skills windsurf "$base_dir/.windsurf/skills" ;;
     codex)
       mkdir -p "$base_dir/.codex/commands"
-      generate_commands codex md "\$ARGUMENTS" "$base_dir/.codex/commands" "py"
+      generate_commands codex md "\$ARGUMENTS" "$base_dir/.codex/commands" "py" ".codex/commands"
       generate_skills codex "$base_dir/.codex/skills" ;;
     kilocode)
       mkdir -p "$base_dir/.kilocode/rules"
-      generate_commands kilocode md "\$ARGUMENTS" "$base_dir/.kilocode/rules" "py"
+      generate_commands kilocode md "\$ARGUMENTS" "$base_dir/.kilocode/rules" "py" ".kilocode/rules"
       generate_skills kilocode "$base_dir/.kilocode/skills" ;;
     auggie)
       mkdir -p "$base_dir/.augment/rules"
-      generate_commands auggie md "\$ARGUMENTS" "$base_dir/.augment/rules" "py"
+      generate_commands auggie md "\$ARGUMENTS" "$base_dir/.augment/rules" "py" ".augment/rules"
       generate_skills auggie "$base_dir/.augment/rules" ;;
     roo)
       mkdir -p "$base_dir/.roo/rules"
-      generate_commands roo md "\$ARGUMENTS" "$base_dir/.roo/rules" "py"
+      generate_commands roo md "\$ARGUMENTS" "$base_dir/.roo/rules" "py" ".roo/rules"
       generate_skills roo "$base_dir/.roo/skills" ;;
     codebuddy)
       mkdir -p "$base_dir/.codebuddy/commands"
-      generate_commands codebuddy md "\$ARGUMENTS" "$base_dir/.codebuddy/commands" "py"
+      generate_commands codebuddy md "\$ARGUMENTS" "$base_dir/.codebuddy/commands" "py" ".codebuddy/commands"
       generate_skills codebuddy "$base_dir/.codebuddy/skills" ;;
     amp)
       mkdir -p "$base_dir/.agents/commands"
-      generate_commands amp md "\$ARGUMENTS" "$base_dir/.agents/commands" "py"
+      generate_commands amp md "\$ARGUMENTS" "$base_dir/.agents/commands" "py" ".agents/commands"
       generate_skills amp "$base_dir/.agents/skills" ;;
     shai)
       mkdir -p "$base_dir/.shai/commands"
-      generate_commands shai md "\$ARGUMENTS" "$base_dir/.shai/commands" "py"
+      generate_commands shai md "\$ARGUMENTS" "$base_dir/.shai/commands" "py" ".shai/commands"
       generate_skills shai "$base_dir/.shai/commands" ;;
     q)
       mkdir -p "$base_dir/.amazonq/prompts"
-      generate_commands q md "\$ARGUMENTS" "$base_dir/.amazonq/prompts" "py"
+      generate_commands q md "\$ARGUMENTS" "$base_dir/.amazonq/prompts" "py" ".amazonq/prompts"
       generate_skills q "$base_dir/.amazonq/cli-agents" ;;
     bob)
       mkdir -p "$base_dir/.bob/commands"
-      generate_commands bob md "\$ARGUMENTS" "$base_dir/.bob/commands" "py"
+      generate_commands bob md "\$ARGUMENTS" "$base_dir/.bob/commands" "py" ".bob/commands"
       generate_skills bob "$base_dir/.bob/skills" ;;
     jules)
       mkdir -p "$base_dir/.agent"
-      generate_commands jules md "\$ARGUMENTS" "$base_dir/.agent" "py"
+      generate_commands jules md "\$ARGUMENTS" "$base_dir/.agent" "py" ".agent"
       generate_skills jules "$base_dir/skills" ;;
     qoder)
       mkdir -p "$base_dir/.qoder/commands"
-      generate_commands qoder md "\$ARGUMENTS" "$base_dir/.qoder/commands" "py"
+      generate_commands qoder md "\$ARGUMENTS" "$base_dir/.qoder/commands" "py" ".qoder/commands"
       generate_skills qoder "$base_dir/.qoder/skills" ;;
     antigravity)
       mkdir -p "$base_dir/.agent/rules"
-      generate_commands antigravity md "\$ARGUMENTS" "$base_dir/.agent/rules" "py"
+      generate_commands antigravity md "\$ARGUMENTS" "$base_dir/.agent/rules" "py" ".agent/rules"
       generate_skills antigravity "$base_dir/.agent/skills" ;;
   esac
    ( cd "$base_dir" && zip -r "../nightlife-template-${agent}-${NEW_VERSION}.zip" . )

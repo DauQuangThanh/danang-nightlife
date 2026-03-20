@@ -25,7 +25,9 @@ def setup_architect(json_mode: bool = False):
     Path(paths['FEATURE_DIR']).mkdir(parents=True, exist_ok=True)
     
     # Copy architect template to docs/ (product-level, not feature-level)
-    template = Path(paths['REPO_ROOT']) / '.nightlife/templates/architect/arch-template.md'
+    agent = detect_ai_agent(paths['REPO_ROOT'])
+    agent_folder = get_agent_folder(agent)
+    template = Path(paths['REPO_ROOT']) / agent_folder / 'architect' / 'arch-template.md'
     docs_dir = Path(paths['REPO_ROOT']) / 'docs'
     docs_dir.mkdir(parents=True, exist_ok=True)
     architect_file = docs_dir / 'architecture.md'

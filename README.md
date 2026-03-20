@@ -940,12 +940,6 @@ Need assistance? We're here to help:
 
 ---
 
-## 🙏 Credits
-
-This project is inspired by and builds upon [Spec-Kit](https://github.com/github/spec-kit).
-
----
-
 ## 📄 License
 
 MIT License - see [LICENSE](./LICENSE) for details.

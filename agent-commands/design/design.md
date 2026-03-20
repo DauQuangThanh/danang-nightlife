@@ -14,9 +14,9 @@ handoffs:
     prompt: Create an E2E test scripts for the following...
     send: false
 scripts:
-   py: python scripts/python/setup-design.py --json
+   py: python scripts/setup-design.py --json
 agent_scripts:
-   py: python scripts/python/update-agent-context.py __AGENT__
+   py: python scripts/update-agent-context.py __AGENT__
 ---
 
 ## User Input

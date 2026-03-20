@@ -1,9 +1,9 @@
 ---
 description: Execute end-to-end tests based on the E2E test plan and generate detailed test result reports.
 scripts:
-   py: python scripts/python/setup-perform-e2e-test.py --json
+   py: python scripts/setup-perform-e2e-test.py --json
 agent_scripts:
-   py: python scripts/python/update-agent-context.py __AGENT__
+   py: python scripts/update-agent-context.py __AGENT__
 ---
 
 ## User Input

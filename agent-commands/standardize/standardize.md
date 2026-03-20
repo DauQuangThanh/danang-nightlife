@@ -10,9 +10,9 @@ handoffs:
     prompt: Review and update architecture design
     send: true
 scripts:
-   py: python scripts/python/setup-standardize.py --json
+   py: python scripts/setup-standardize.py --json
 agent_scripts:
-   py: python scripts/python/update-agent-context.py __AGENT__
+   py: python scripts/update-agent-context.py __AGENT__
 ---
 
 ## User Input

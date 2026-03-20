@@ -25,8 +25,10 @@ def setup_assess_context(json_mode: bool = False):
     docs_dir = Path(paths['REPO_ROOT']) / 'docs'
     docs_dir.mkdir(parents=True, exist_ok=True)
     
-    # Copy context assessment template
-    template = Path(paths['REPO_ROOT']) / '.nightlife/templates/assess-context/context-assessment-template.md'
+    # Copy context assessment template (located in the agent folder alongside agent commands)
+    agent = detect_ai_agent(paths['REPO_ROOT'])
+    agent_folder = get_agent_folder(agent)
+    template = Path(paths['REPO_ROOT']) / agent_folder / 'assess-context' / 'context-assessment-template.md'
     assessment_file = docs_dir / 'context-assessment.md'
     if template.exists():
         copy2(template, assessment_file)

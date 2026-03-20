@@ -14,9 +14,9 @@ handoffs:
     prompt: Review and update project ground rules and constraints
     send: true
 scripts:
-   py: python scripts/python/setup-architect.py --json
+   py: python scripts/setup-architect.py --json
 agent_scripts:
-   py: python scripts/python/update-agent-context.py __AGENT__
+   py: python scripts/update-agent-context.py __AGENT__
 ---
 
 ## User Input

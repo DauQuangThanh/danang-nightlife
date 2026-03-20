@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 from rich.console import Console
 
-from .config import CLAUDE_LOCAL_PATH
+from .config import AGENT_CONFIG, CLAUDE_LOCAL_PATH
 
 if TYPE_CHECKING:
     from .ui import StepTracker
@@ -125,37 +125,54 @@ def init_git_repo(project_path: Path, quiet: bool = False) -> Tuple[bool, Option
 
 
 def ensure_executable_scripts(project_path: Path, tracker: "StepTracker | None" = None) -> None:
-    """Ensure Python scripts under .nightlife/scripts (recursively) have execute bits (no-op on Windows)."""
+    """Ensure Python scripts inside agent-folder scripts/ directories have execute bits (no-op on Windows)."""
     if os.name == "nt":
         return  # Windows: skip silently
-    scripts_root = project_path / ".nightlife" / "scripts"
-    if not scripts_root.is_dir():
+
+    # Collect unique per-command scripts/ directories from every known agent folder.
+    # Scripts now live at [agent_folder]/[cmd_name]/scripts/ (self-contained per command).
+    seen: set[Path] = set()
+    scripts_roots: list[Path] = []
+    seen_agent_folders: set[Path] = set()
+    for cfg in AGENT_CONFIG.values():
+        agent_folder_path = project_path / cfg["agent_folder"]
+        if not agent_folder_path.is_dir() or agent_folder_path in seen_agent_folders:
+            continue
+        seen_agent_folders.add(agent_folder_path)
+        for cmd_scripts in agent_folder_path.glob("*/scripts"):
+            if cmd_scripts.is_dir() and cmd_scripts not in seen:
+                seen.add(cmd_scripts)
+                scripts_roots.append(cmd_scripts)
+
+    if not scripts_roots:
         return
+
     failures: list[str] = []
     updated = 0
-    for script in scripts_root.rglob("*.py"):
-        try:
-            if script.is_symlink() or not script.is_file():
-                continue
+    for scripts_root in scripts_roots:
+        for script in scripts_root.rglob("*.py"):
             try:
-                with script.open("rb") as f:
-                    if f.read(2) != b"#!":
-                        continue
-            except Exception:
-                continue
-            st = script.stat(); mode = st.st_mode
-            if mode & 0o111:
-                continue
-            new_mode = mode
-            if mode & 0o400: new_mode |= 0o100
-            if mode & 0o040: new_mode |= 0o010
-            if mode & 0o004: new_mode |= 0o001
-            if not (new_mode & 0o100):
-                new_mode |= 0o100
-            os.chmod(script, new_mode)
-            updated += 1
-        except Exception as e:
-            failures.append(f"{script.relative_to(scripts_root)}: {e}")
+                if script.is_symlink() or not script.is_file():
+                    continue
+                try:
+                    with script.open("rb") as f:
+                        if f.read(2) != b"#!":
+                            continue
+                except Exception:
+                    continue
+                st = script.stat(); mode = st.st_mode
+                if mode & 0o111:
+                    continue
+                new_mode = mode
+                if mode & 0o400: new_mode |= 0o100
+                if mode & 0o040: new_mode |= 0o010
+                if mode & 0o004: new_mode |= 0o001
+                if not (new_mode & 0o100):
+                    new_mode |= 0o100
+                os.chmod(script, new_mode)
+                updated += 1
+            except Exception as e:
+                failures.append(f"{script.relative_to(scripts_root)}: {e}")
     if tracker:
         detail = f"{updated} updated" + (f", {len(failures)} failed" if failures else "")
         tracker.add("chmod", "Set script permissions recursively")

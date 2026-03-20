@@ -28,8 +28,10 @@ def setup_perform_e2e_test(json_mode: bool = False):
     test_results_dir = Path(paths['REPO_ROOT']) / 'test-results'
     test_results_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use e2e test template as reference for test execution
-    template = Path(paths['REPO_ROOT']) / '.nightlife/templates/perform-e2e-test/e2e-test-template.md'
+    # Use e2e test template as reference for test execution (located in the agent folder alongside agent commands)
+    agent = detect_ai_agent(paths['REPO_ROOT'])
+    agent_folder = get_agent_folder(agent)
+    template = Path(paths['REPO_ROOT']) / agent_folder / 'perform-e2e-test' / 'e2e-test-template.md'
     e2e_file = test_results_dir / 'e2e-test-plan-reference.md'
     if template.exists():
         copy2(template, e2e_file)

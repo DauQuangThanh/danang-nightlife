@@ -45,7 +45,7 @@ AGENT_FILES = {
     'antigravity': 'AGENTS.md'
 }
 
-TEMPLATE_FILE = '.nightlife/templates/shared-templates/agent-file-template.md'
+TEMPLATE_FILE = ''  # Resolved at runtime from the detected agent folder
 
 # Global variables
 NEW_LANG = ''
@@ -126,10 +126,11 @@ def get_language_conventions(lang: str) -> str:
     """Get language conventions"""
     return f"{lang}: Follow standard conventions" if lang else "General: Follow standard conventions"
 
-def create_new_agent_file(target_file: str, project_name: str, current_date: str) -> bool:
+def create_new_agent_file(target_file: str, project_name: str, current_date: str, template_file: str = '') -> bool:
     """Create new agent file from template"""
-    if not Path(TEMPLATE_FILE).exists():
-        print_error(f"Template not found at {TEMPLATE_FILE}")
+    tmpl = template_file or TEMPLATE_FILE
+    if not tmpl or not Path(tmpl).exists():
+        print_error(f"Template not found at {tmpl or '(no path resolved)'}")
         return False
     
     temp_file = Path(target_file).with_suffix('.tmp')
@@ -158,7 +159,7 @@ def create_new_agent_file(target_file: str, project_name: str, current_date: str
         recent_change = f"- {CURRENT_BRANCH}: Added"
     
     # Read template and replace
-    with open(TEMPLATE_FILE, 'r', encoding='utf-8') as f:
+    with open(tmpl, 'r', encoding='utf-8') as f:
         content = f.read()
     
     content = content.replace('[PROJECT NAME]', project_name)
@@ -257,21 +258,21 @@ def update_existing_agent_file(target_file: str, current_date: str) -> bool:
     
     return True
 
-def update_agent_file(target_file: str, agent_name: str) -> bool:
+def update_agent_file(target_file: str, agent_name: str, template_file: str = '') -> bool:
     """Update agent file"""
     print_info(f"Updating {agent_name} context file: {target_file}")
-    
+
     repo_root = get_repo_root()
     current_branch = get_current_branch()
     current_date = datetime.now().strftime('%Y-%m-%d')
-    
+
     # Create dir if needed
     Path(target_file).parent.mkdir(parents=True, exist_ok=True)
-    
+
     if not Path(target_file).exists():
         # Create new
         project_name = Path(repo_root).name
-        if create_new_agent_file(target_file, project_name, current_date):
+        if create_new_agent_file(target_file, project_name, current_date, template_file):
             print_success(f"Created new {agent_name} context file")
         else:
             print_error(f"Failed to create new agent file")
@@ -286,13 +287,13 @@ def update_agent_file(target_file: str, agent_name: str) -> bool:
     
     return True
 
-def update_specific_agent(agent_type: str) -> bool:
+def update_specific_agent(agent_type: str, template_file: str = '') -> bool:
     """Update specific agent"""
     if agent_type not in AGENT_FILES:
         print_error(f"Unknown agent type '{agent_type}'")
         print_error("Expected: " + '|'.join(AGENT_FILES.keys()))
         return False
-    
+
     repo_root = get_repo_root()
     target_file = str(Path(repo_root) / AGENT_FILES[agent_type])
     
@@ -319,14 +320,14 @@ def update_specific_agent(agent_type: str) -> bool:
     }
     
     agent_name = agent_names.get(agent_type, agent_type)
-    return update_agent_file(target_file, agent_name)
+    return update_agent_file(target_file, agent_name, template_file)
 
-def update_all_existing_agents() -> bool:
+def update_all_existing_agents(template_file: str = '') -> bool:
     """Update all existing agents"""
     repo_root = get_repo_root()
     found = False
     success = True
-    
+
     for agent_type, file_path in AGENT_FILES.items():
         full_path = Path(repo_root) / file_path
         if full_path.exists():
@@ -352,15 +353,15 @@ def update_all_existing_agents() -> bool:
                 'amp': 'Amp'
             }
             agent_name = agent_names.get(agent_type, agent_type)
-            if not update_agent_file(str(full_path), agent_name):
+            if not update_agent_file(str(full_path), agent_name, template_file):
                 success = False
             found = True
-    
+
     if not found:
         print_info("No existing agent files found, creating default Claude file...")
-        if not update_specific_agent('claude'):
+        if not update_specific_agent('claude', template_file):
             success = False
-    
+
     return success
 
 def print_summary():
@@ -388,36 +389,42 @@ def main():
     global CURRENT_BRANCH
     CURRENT_BRANCH = paths['CURRENT_BRANCH']
     NEW_PLAN = paths['FEATURE_DESIGN']
-    
+    repo_root = paths['REPO_ROOT']
+
+    # Resolve template file from the detected agent folder (no .nightlife/ needed)
+    detected_agent = detect_ai_agent(repo_root)
+    agent_folder = get_agent_folder(detected_agent)
+    resolved_template = str(Path(repo_root) / agent_folder / 'shared-templates' / 'agent-file-template.md') if agent_folder else ''
+
     # Validate
     if not check_feature_branch(CURRENT_BRANCH, paths['HAS_GIT'] == 'true'):
         sys.exit(1)
-    
+
     if not Path(NEW_PLAN).exists():
         print_error(f"No design.md found at {NEW_PLAN}")
         print_info("Make sure you're working on a feature with a corresponding spec directory")
         sys.exit(1)
-    
-    if not Path(TEMPLATE_FILE).exists():
-        print_error(f"Template file not found at {TEMPLATE_FILE}")
+
+    if not resolved_template or not Path(resolved_template).exists():
+        print_error(f"Template file not found at {resolved_template or '(no agent folder detected)'}")
         sys.exit(1)
-    
+
     print_info(f"=== Updating agent context files for feature {CURRENT_BRANCH} ===")
-    
+
     # Parse plan
     if not parse_plan_data(NEW_PLAN):
         print_error("Failed to parse plan data")
         sys.exit(1)
-    
+
     success = True
-    
+
     if args.agent_type:
         print_info(f"Updating specific agent: {args.agent_type}")
-        if not update_specific_agent(args.agent_type):
+        if not update_specific_agent(args.agent_type, resolved_template):
             success = False
     else:
         print_info("No agent specified, updating all existing agent files...")
-        if not update_all_existing_agents():
+        if not update_all_existing_agents(resolved_template):
             success = False
     
     print_summary()

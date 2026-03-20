@@ -10,7 +10,7 @@ handoffs:
     prompt: Update the detailed design for the spec. I am building with...
     send: false
 scripts:
-     py: python scripts/python/check-prerequisites.py --json --paths-only
+     py: python scripts/check-prerequisites.py --json --paths-only
 ---
 
 ## User Input

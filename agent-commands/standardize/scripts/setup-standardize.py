@@ -19,7 +19,9 @@ def setup_standardize(json_mode: bool = False):
     # Define paths
     docs_dir = Path(repo_root) / 'docs'
     standards_file = docs_dir / 'standards.md'
-    template_file = Path(repo_root) / '.nightlife/templates/standardize/standards-template.md'
+    agent = detect_ai_agent(repo_root)
+    agent_folder = get_agent_folder(agent)
+    template_file = Path(repo_root) / agent_folder / 'standardize' / 'standards-template.md'
     ground_rules_file = Path(repo_root) / 'docs/ground-rules.md'
     architecture_file = docs_dir / 'architecture.md'
     specs_dir = Path(repo_root) / 'specs'

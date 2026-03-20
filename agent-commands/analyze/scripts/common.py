@@ -197,6 +197,30 @@ def detect_all_ai_agents(repo_root: str) -> List[str]:
 
     return agents if agents else ['unknown']
 
+def get_agent_folder(agent: str) -> str:
+    mapping = {
+        'claude': '.claude/commands',
+        'copilot': '.github/agents',
+        'cursor-agent': '.cursor/commands',
+        'windsurf': '.windsurf/workflows',
+        'gemini': '.gemini/commands',
+        'qwen': '.qwen/commands',
+        'opencode': '.opencode/command',
+        'codex': '.codex/commands',
+        'kilocode': '.kilocode/rules',
+        'auggie': '.augment/rules',
+        'roo': '.roo/rules',
+        'codebuddy': '.codebuddy/commands',
+        'q': '.amazonq/prompts',
+        'amp': '.agents/commands',
+        'shai': '.shai/commands',
+        'bob': '.bob/commands',
+        'jules': '.agent',
+        'qoder': '.qoder/commands',
+        'antigravity': '.agent/rules',
+    }
+    return mapping.get(agent, '')
+
 def get_skills_folder(agent: str) -> str:
     mapping = {
         'copilot': '.github/skills',

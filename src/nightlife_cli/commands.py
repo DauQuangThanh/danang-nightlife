@@ -41,7 +41,7 @@ def init(
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
     force: bool = typer.Option(False, "--force", help="Force merge/overwrite when using --here (skip confirmation)"),
-    upgrade: bool = typer.Option(False, "--upgrade", help="Upgrade existing Nightlife project by replacing .nightlife and agent folders with latest templates"),
+    upgrade: bool = typer.Option(False, "--upgrade", help="Upgrade existing Nightlife project by replacing agent folders with latest templates"),
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
     debug: bool = typer.Option(False, "--debug", help="Show verbose diagnostic output for network and extraction failures"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token to use for API requests (or set GH_TOKEN or GITHUB_TOKEN environment variable)"),
@@ -146,9 +146,14 @@ def init(
     else:
         project_path = Path(project_name).resolve()
         if project_path.exists() and not upgrade:
-            # Check if Nightlife is already installed in this directory
-            sunrise_dir = project_path / ".nightlife"
-            if sunrise_dir.exists():
+            # Check if Nightlife is already installed in this directory by looking for any
+            # agent folder that contains nightlife.* command files
+            nightlife_installed = any(
+                list((project_path / cfg["agent_folder"]).glob("nightlife.*"))
+                for cfg in AGENT_CONFIG.values()
+                if (project_path / cfg["agent_folder"]).is_dir()
+            )
+            if nightlife_installed:
                 # Nightlife is installed, suggest upgrade
                 error_panel = Panel(
                     f"Directory '[cyan]{project_name}[/cyan]' already exists with Nightlife installed\n\n"
@@ -202,11 +207,15 @@ def init(
     existing_agents = []
 
     if upgrade:
-        sunrise_dir = project_path / ".nightlife"
-        if not sunrise_dir.exists():
+        nightlife_installed = any(
+            list((project_path / cfg["agent_folder"]).glob("nightlife.*"))
+            for cfg in AGENT_CONFIG.values()
+            if (project_path / cfg["agent_folder"]).is_dir()
+        )
+        if not nightlife_installed:
             error_panel = Panel(
                 f"No Nightlife project found in '[cyan]{project_path}[/cyan]'\n"
-                "The .nightlife folder does not exist. Cannot upgrade.\n\n"
+                "No agent folders with Nightlife commands detected. Cannot upgrade.\n\n"
                 "Use 'nightlife init' without --upgrade to initialize a new project.",
                 title="[red]Upgrade Failed[/red]",
                 border_style="red",
@@ -249,7 +258,7 @@ def init(
         if is_upgrade_mode:
             warning_lines.extend([
                 "The following will be [bold red]completely replaced[/bold red]:",
-                "  • .nightlife/ folder (scripts, templates, memory)",
+                "  • Agent command folders (commands, templates, scripts)",
             ])
         else:
             warning_lines.append("Existing agent folders will be backed up before merging:")
@@ -426,13 +435,6 @@ def init(
                 tracker.start("backup")
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-                # Backup .nightlife folder
-                sunrise_dir = project_path / ".nightlife"
-                if sunrise_dir.exists():
-                    backup_sunrise = project_path / f".nightlife.backup.{timestamp}"
-                    shutil.copytree(sunrise_dir, backup_sunrise)
-                    backup_paths[".nightlife"] = backup_sunrise
-
                 # Backup Jules root-level skills folder (special case)
                 jules_skills = project_path / "skills"
                 if jules_skills.exists():
@@ -458,7 +460,6 @@ def init(
                 tracker.complete("backup", f"{backup_count} folder{'s' if backup_count != 1 else ''} backed up")
 
             # Download and extract templates for each selected AI agent
-            # Only copy shared .nightlife folder for the first agent to avoid redundancy
             for idx, selected_ai in enumerate(selected_ais):
                 is_first = (idx == 0)
                 download_and_extract_template(

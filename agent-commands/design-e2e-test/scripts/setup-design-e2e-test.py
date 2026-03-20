@@ -24,8 +24,10 @@ def setup_design_e2e_test(json_mode: bool = False):
     # Ensure feature dir
     Path(paths['FEATURE_DIR']).mkdir(parents=True, exist_ok=True)
     
-    # Copy design e2e test template
-    template = Path(paths['REPO_ROOT']) / '.nightlife/templates/design-e2e-test/e2e-test-template.md'
+    # Copy design e2e test template (located in the agent folder alongside agent commands)
+    agent = detect_ai_agent(paths['REPO_ROOT'])
+    agent_folder = get_agent_folder(agent)
+    template = Path(paths['REPO_ROOT']) / agent_folder / 'design-e2e-test' / 'e2e-test-template.md'
     docs_dir = Path(paths['REPO_ROOT']) / 'docs'
     docs_dir.mkdir(parents=True, exist_ok=True)
     design_e2e_file = docs_dir / 'e2e-test-plan.md'

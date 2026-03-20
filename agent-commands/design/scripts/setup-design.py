@@ -24,8 +24,10 @@ def setup_design(json_mode: bool = False):
     # Ensure feature dir
     Path(paths['FEATURE_DIR']).mkdir(parents=True, exist_ok=True)
     
-    # Copy template
-    template = Path(paths['REPO_ROOT']) / '.nightlife/templates/design/design-template.md'
+    # Copy template (located in the agent folder alongside agent commands)
+    agent = detect_ai_agent(paths['REPO_ROOT'])
+    agent_folder = get_agent_folder(agent)
+    template = Path(paths['REPO_ROOT']) / agent_folder / 'design' / 'design-template.md'
     design_file = Path(paths['FEATURE_DESIGN'])
     if template.exists():
         copy2(template, design_file)

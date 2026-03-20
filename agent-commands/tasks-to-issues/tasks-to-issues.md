@@ -2,7 +2,7 @@
 description: Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.
 tools: ['github/github-mcp-server/issue_write']
 scripts:
-   py: python scripts/python/check-prerequisites.py --json --require-tasks --include-tasks
+   py: python scripts/check-prerequisites.py --json --require-tasks --include-tasks
 ---
 
 ## User Input
