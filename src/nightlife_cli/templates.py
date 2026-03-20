@@ -304,7 +304,8 @@ def copy_local_template(
         vscode_dir.mkdir(exist_ok=True)
         vscode_settings_src = commands_dir / "shared-templates" / "vscode-settings.json"
         if vscode_settings_src.exists():
-            shutil.copy2(vscode_settings_src, vscode_dir / "settings.json")
+            dest_file = vscode_dir / "settings.json"
+            handle_vscode_settings(vscode_settings_src, dest_file, Path(".vscode/settings.json"), verbose, tracker)
             if verbose and not tracker:
                 console.print(f"[green]✓[/green] Created .vscode/settings.json")
 
