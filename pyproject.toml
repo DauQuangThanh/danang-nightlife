@@ -1,6 +1,6 @@
 [project]
 name = "nightlife-cli"
-version = "0.0.1"
+version = "0.0.2"
 description = "Nightlife CLI, part of Danang Nightlife Project. A framework to develop your project with Spec-Driven Development (SDD)."
 requires-python = ">=3.11"
 dependencies = [
