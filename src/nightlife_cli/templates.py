@@ -202,9 +202,10 @@ def copy_local_template(
     skills_dir = source_path / "skills"
     scripts_dir = source_path / "scripts"
 
-    # Check if required directories exist
-    if not commands_dir.exists():
-        raise FileNotFoundError(f"Commands directory not found: {commands_dir}")
+    # Commands directory is optional - skills-only installs are valid
+    has_commands = commands_dir.is_dir() and any(
+        item for item in commands_dir.iterdir() if item.is_dir()
+    )
 
     if verbose and not tracker:
         console.print(f"[cyan]Copying templates from:[/cyan] {source_path}")
@@ -236,7 +237,7 @@ def copy_local_template(
     #   [agent_folder]/nightlife.<cmd>.<ext>       ← command file
     #   [agent_folder]/<cmd>/<template-file>        ← command-specific templates
     #   [agent_folder]/shared-templates/<file>      ← shared assets (e.g. agent-file-template.md)
-    for cmd_subdir in commands_dir.iterdir():
+    for cmd_subdir in (commands_dir.iterdir() if has_commands else []):
         if not cmd_subdir.is_dir():
             continue
 
@@ -407,92 +408,30 @@ def download_and_extract_template(
             elif verbose:
                 console.print(f"[cyan]ZIP contains {len(zip_contents)} items[/cyan]")
 
-            if is_current_dir:
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    temp_path = Path(temp_dir)
-                    zip_ref.extractall(temp_path)
+            # Extract to temp directory, then use copy_local_template to build
+            # agent-specific folder structure (same logic as --local-templates)
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_path = Path(temp_dir)
+                zip_ref.extractall(temp_path)
 
-                    extracted_items = list(temp_path.iterdir())
-                    if tracker:
-                        tracker.start("extracted-summary")
-                        tracker.complete("extracted-summary", f"temp {len(extracted_items)} items")
-                    elif verbose:
-                        console.print(f"[cyan]Extracted {len(extracted_items)} items to temp location[/cyan]")
+                extracted_items = list(temp_path.iterdir())
+                if tracker:
+                    tracker.start("extracted-summary")
+                    tracker.complete("extracted-summary", f"temp {len(extracted_items)} items")
+                elif verbose:
+                    console.print(f"[cyan]Extracted {len(extracted_items)} items to temp location[/cyan]")
 
-                    source_dir = temp_path
-                    if len(extracted_items) == 1 and extracted_items[0].is_dir() and not extracted_items[0].name.startswith('.'):
-                        source_dir = extracted_items[0]
-                        if tracker:
-                            tracker.add("flatten", "Flatten nested directory")
-                            tracker.complete("flatten")
-                        elif verbose:
-                            console.print(f"[cyan]Found nested directory structure[/cyan]")
+                # Handle nested directory structure
+                source_dir = temp_path
+                if len(extracted_items) == 1 and extracted_items[0].is_dir() and not extracted_items[0].name.startswith('.'):
+                    source_dir = extracted_items[0]
 
-                    for item in source_dir.iterdir():
-                        # Skip .nightlife folder for non-first agents to avoid redundancy
-                        if not is_first_agent and item.name == ".nightlife":
-                            continue
-
-                        dest_path = project_path / item.name
-                        if item.is_dir():
-                            if dest_path.exists():
-                                if verbose and not tracker:
-                                    console.print(f"[yellow]Merging directory:[/yellow] {item.name}")
-                                for sub_item in item.rglob('*'):
-                                    if sub_item.is_file():
-                                        rel_path = sub_item.relative_to(item)
-                                        dest_file = dest_path / rel_path
-                                        dest_file.parent.mkdir(parents=True, exist_ok=True)
-                                        # Special handling for .vscode/settings.json - merge instead of overwrite
-                                        if dest_file.name == "settings.json" and dest_file.parent.name == ".vscode":
-                                            handle_vscode_settings(sub_item, dest_file, rel_path, verbose, tracker)
-                                        else:
-                                            shutil.copy2(sub_item, dest_file)
-                            else:
-                                shutil.copytree(item, dest_path)
-                        else:
-                            if dest_path.exists() and verbose and not tracker:
-                                console.print(f"[yellow]Overwriting file:[/yellow] {item.name}")
-                            shutil.copy2(item, dest_path)
-                    if verbose and not tracker:
-                        console.print(f"[cyan]Template files merged into current directory[/cyan]")
-            else:
-                # Extract to temp directory first so we can selectively copy
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    temp_path = Path(temp_dir)
-                    zip_ref.extractall(temp_path)
-
-                    extracted_items = list(temp_path.iterdir())
-                    if tracker:
-                        tracker.start("extracted-summary")
-                        tracker.complete("extracted-summary", f"temp {len(extracted_items)} items")
-                    elif verbose:
-                        console.print(f"[cyan]Extracted {len(extracted_items)} items to temp:[/cyan]")
-
-                    # Handle nested directory structure
-                    source_dir = temp_path
-                    if len(extracted_items) == 1 and extracted_items[0].is_dir() and not extracted_items[0].name.startswith('.'):
-                        source_dir = extracted_items[0]
-                        if tracker:
-                            tracker.add("flatten", "Flatten nested directory")
-                            tracker.complete("flatten")
-                        elif verbose:
-                            console.print(f"[cyan]Found nested directory structure[/cyan]")
-
-                    # Copy items from temp to project_path, skipping .nightlife for non-first agents
-                    for item in source_dir.iterdir():
-                        # Skip .nightlife folder for non-first agents to avoid redundancy
-                        if not is_first_agent and item.name == ".nightlife":
-                            continue
-
-                        dest_path = project_path / item.name
-                        if item.is_dir():
-                            shutil.copytree(item, dest_path, dirs_exist_ok=True)
-                        else:
-                            shutil.copy2(item, dest_path)
-
-                    if verbose and not tracker:
-                        console.print(f"[cyan]Template files copied to {project_path}[/cyan]")
+                # Use copy_local_template to build the agent-specific layout
+                # from the extracted skills/ and agent-commands/ directories
+                copy_local_template(
+                    project_path, source_dir, ai_assistant, script_type,
+                    is_current_dir, verbose, tracker, is_first_agent
+                )
 
     except Exception as e:
         if tracker:
@@ -506,7 +445,6 @@ def download_and_extract_template(
 
         if not is_current_dir and project_path.exists():
             shutil.rmtree(project_path)
-        # Re-raise the original exception instead of typer.Exit to preserve error details
         raise
     else:
         if tracker:

@@ -16,6 +16,6 @@ VERSION="$1"
 VERSION_NO_V=${VERSION#v}
 
 gh release create "$VERSION" \
-  .genreleases/nightlife-skills-"$VERSION".zip \
+  .genreleases/nightlife-template-"$VERSION".zip \
   --title "Danang Nightlife - $VERSION_NO_V" \
   --notes-file release_notes.md

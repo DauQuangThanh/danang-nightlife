@@ -23,10 +23,10 @@ GENRELEASES_DIR=".genreleases"
 mkdir -p "$GENRELEASES_DIR"
 rm -rf "$GENRELEASES_DIR"/* || true
 
-# Build single package with all skills
-build_skills_package() {
-  local base_dir="$GENRELEASES_DIR/nightlife-skills-package"
-  echo "Building unified skills package..."
+# Build unified template package with skills and agent-commands
+build_template_package() {
+  local base_dir="$GENRELEASES_DIR/nightlife-template-package"
+  echo "Building unified template package..."
   mkdir -p "$base_dir"
 
   # Copy all skill subdirectories
@@ -38,20 +38,21 @@ build_skills_package() {
     exit 1
   fi
 
-  # Copy nightlife.yaml to the package root
-  if [[ -f nightlife.yaml ]]; then
-    cp nightlife.yaml "$base_dir/nightlife.yaml"
-    echo "Copied nightlife.yaml -> $base_dir/nightlife.yaml"
+  # Copy agent-commands directory
+  if [[ -d agent-commands ]]; then
+    cp -r agent-commands "$base_dir/agent-commands"
+    echo "Copied agent-commands -> $base_dir/agent-commands"
   else
-    echo "Warning: nightlife.yaml not found, skipping"
+    echo "Warning: agent-commands directory not found, creating empty"
+    mkdir -p "$base_dir/agent-commands"
   fi
 
   # Create the zip file
-  ( cd "$base_dir" && zip -r "../nightlife-skills-${NEW_VERSION}.zip" . )
-  echo "Created $GENRELEASES_DIR/nightlife-skills-${NEW_VERSION}.zip"
+  ( cd "$base_dir" && zip -r "../nightlife-template-${NEW_VERSION}.zip" . )
+  echo "Created $GENRELEASES_DIR/nightlife-template-${NEW_VERSION}.zip"
 }
 
-build_skills_package
+build_template_package
 
 echo "Archive in $GENRELEASES_DIR:"
-ls -1 "$GENRELEASES_DIR"/nightlife-skills-"${NEW_VERSION}".zip
+ls -1 "$GENRELEASES_DIR"/nightlife-template-"${NEW_VERSION}".zip
