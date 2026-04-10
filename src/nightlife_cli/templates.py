@@ -1,7 +1,6 @@
 """Template operations for Nightlife CLI."""
 
 import json
-import re
 import shutil
 import tempfile
 import zipfile
@@ -10,101 +9,12 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from .config import AGENT_CONFIG, ARGS_FORMAT_MAP, EXTENSION_MAP
+from .config import AGENT_CONFIG
 from .github import download_template_from_github
 from .ui import console
 
 if TYPE_CHECKING:
     from .ui import StepTracker
-
-
-def _process_command_content(content: str, ai_assistant: str, agent_folder: str, cmd_name: str = "", script_type: str = "py") -> str:
-    """Process a command file's content: extract script commands from frontmatter,
-    replace {SCRIPT}/{AGENT_SCRIPT} placeholders, strip script sections from
-    frontmatter, and rewrite scripts/ paths to [agent_folder]/[cmd_name]/scripts/.
-
-    This mirrors what create-release-packages.sh's generate_commands() does
-    for release builds, ensuring local template installs produce identical output.
-    """
-    # Normalize line endings
-    content = content.replace('\r\n', '\n').replace('\r', '\n')
-
-    # Scripts live inside the per-command subfolder: [agent_folder]/[cmd_name]/scripts/
-    scripts_dest = f"{agent_folder}/{cmd_name}/scripts/" if cmd_name else f"{agent_folder}/scripts/"
-
-    def _rewrite_script_paths(text: str) -> str:
-        text = text.replace('scripts/', scripts_dest)
-        # Prevent double-prefixing if content was already processed
-        text = text.replace(f"{agent_folder}/{scripts_dest}", scripts_dest)
-        return text
-
-    # Check if file has YAML frontmatter
-    if not content.startswith('---\n'):
-        # No frontmatter; just rewrite paths
-        return _rewrite_script_paths(content)
-
-    # Split into frontmatter and body
-    parts = content.split('---\n', 2)
-    if len(parts) < 3:
-        return _rewrite_script_paths(content)
-
-    frontmatter = parts[1]
-    body = parts[2]
-
-    # Extract script command from frontmatter (e.g., "scripts:\n   py: python scripts/check-prerequisites.py ...")
-    script_command = ''
-    script_match = re.search(
-        r'^scripts:\s*\n\s+' + re.escape(script_type) + r':\s*(.+)$',
-        frontmatter, re.MULTILINE
-    )
-    if script_match:
-        script_command = script_match.group(1).strip()
-
-    # Extract agent_script command from frontmatter
-    agent_script_command = ''
-    agent_script_match = re.search(
-        r'^agent_scripts:\s*\n\s+' + re.escape(script_type) + r':\s*(.+)$',
-        frontmatter, re.MULTILINE
-    )
-    if agent_script_match:
-        agent_script_command = agent_script_match.group(1).strip()
-
-    # Replace {SCRIPT} placeholder in body with the extracted script command
-    if script_command:
-        body = body.replace('{SCRIPT}', script_command)
-
-    # Replace {AGENT_SCRIPT} placeholder in body with the extracted agent script command
-    if agent_script_command:
-        body = body.replace('{AGENT_SCRIPT}', agent_script_command)
-
-    # Remove scripts: and agent_scripts: sections from frontmatter
-    # Each section is: key line + indented child lines
-    cleaned_lines = []
-    skip_section = False
-    for line in frontmatter.splitlines():
-        if re.match(r'^scripts:\s*$', line) or re.match(r'^agent_scripts:\s*$', line):
-            skip_section = True
-            continue
-        if skip_section:
-            # If line is indented, it's part of the section to skip
-            if line.startswith(' ') or line.startswith('\t') or line == '':
-                continue
-            else:
-                # New top-level key, stop skipping
-                skip_section = False
-        cleaned_lines.append(line)
-
-    cleaned_frontmatter = '\n'.join(cleaned_lines)
-    if cleaned_frontmatter and not cleaned_frontmatter.endswith('\n'):
-        cleaned_frontmatter += '\n'
-
-    # Reassemble with frontmatter
-    result = '---\n' + cleaned_frontmatter + '---\n' + body
-
-    # Rewrite scripts/ paths to [agent_folder]/scripts/ (avoid double-prefixing)
-    result = _rewrite_script_paths(result)
-
-    return result
 
 
 def handle_vscode_settings(sub_item, dest_file, rel_path, verbose=False, tracker=None) -> None:
@@ -188,9 +98,8 @@ def copy_local_template(
 ) -> Path:
     """Copy local template files to the project directory.
 
-    Each agent is self-contained: command files, templates, scripts, and shared
-    assets all land inside the agent-specific folder. No .nightlife/ folder is
-    created or required.
+    Installs skills and subagents into the platform-specific folders.
+    No commands or rules are installed.
 
     Args:
         is_first_agent: Kept for API compatibility but no longer affects behaviour
@@ -213,13 +122,8 @@ def copy_local_template(
     if not agent_config:
         raise ValueError(f"Unknown AI assistant: {ai_assistant}")
 
-    agent_folder = agent_config["agent_folder"]
     skills_folder = agent_config["skills_folder"]
     subagents_folder = agent_config.get("subagents_folder")
-
-    # Ensure agent root directory exists
-    agent_path = project_path / agent_folder
-    agent_path.mkdir(parents=True, exist_ok=True)
 
     # Install subagents from agents/ directory into the platform's subagents folder.
     # GitHub Copilot (IDE and CLI) uses .agent.md; all other platforms use .md.

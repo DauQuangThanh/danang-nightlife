@@ -125,24 +125,24 @@ def init_git_repo(project_path: Path, quiet: bool = False) -> Tuple[bool, Option
 
 
 def ensure_executable_scripts(project_path: Path, tracker: "StepTracker | None" = None) -> None:
-    """Ensure Python scripts inside agent-folder scripts/ directories have execute bits (no-op on Windows)."""
+    """Ensure Python scripts inside skills scripts/ directories have execute bits (no-op on Windows)."""
     if os.name == "nt":
         return  # Windows: skip silently
 
-    # Collect unique per-command scripts/ directories from every known agent folder.
-    # Scripts now live at [agent_folder]/[cmd_name]/scripts/ (self-contained per command).
+    # Collect unique scripts/ directories from every known skills folder.
+    # Scripts live at [skills_folder]/[skill_name]/scripts/ (self-contained per skill).
     seen: set[Path] = set()
     scripts_roots: list[Path] = []
-    seen_agent_folders: set[Path] = set()
+    seen_skills_folders: set[Path] = set()
     for cfg in AGENT_CONFIG.values():
-        agent_folder_path = project_path / cfg["agent_folder"]
-        if not agent_folder_path.is_dir() or agent_folder_path in seen_agent_folders:
+        skills_folder_path = project_path / cfg["skills_folder"]
+        if not skills_folder_path.is_dir() or skills_folder_path in seen_skills_folders:
             continue
-        seen_agent_folders.add(agent_folder_path)
-        for cmd_scripts in agent_folder_path.glob("*/scripts"):
-            if cmd_scripts.is_dir() and cmd_scripts not in seen:
-                seen.add(cmd_scripts)
-                scripts_roots.append(cmd_scripts)
+        seen_skills_folders.add(skills_folder_path)
+        for skill_scripts in skills_folder_path.glob("*/scripts"):
+            if skill_scripts.is_dir() and skill_scripts not in seen:
+                seen.add(skill_scripts)
+                scripts_roots.append(skill_scripts)
 
     if not scripts_roots:
         return

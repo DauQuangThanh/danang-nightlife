@@ -147,11 +147,11 @@ def init(
         project_path = Path(project_name).resolve()
         if project_path.exists() and not upgrade:
             # Check if Nightlife is already installed in this directory by looking for any
-            # agent folder that contains nightlife.* command files
+            # skills folder that contains skill subdirectories with SKILL.md
             nightlife_installed = any(
-                list((project_path / cfg["agent_folder"]).glob("nightlife.*"))
+                list((project_path / cfg["skills_folder"]).glob("*/SKILL.md"))
                 for cfg in AGENT_CONFIG.values()
-                if (project_path / cfg["agent_folder"]).is_dir()
+                if (project_path / cfg["skills_folder"]).is_dir()
             )
             if nightlife_installed:
                 # Nightlife is installed, suggest upgrade
@@ -208,14 +208,14 @@ def init(
 
     if upgrade:
         nightlife_installed = any(
-            list((project_path / cfg["agent_folder"]).glob("nightlife.*"))
+            list((project_path / cfg["skills_folder"]).glob("*/SKILL.md"))
             for cfg in AGENT_CONFIG.values()
-            if (project_path / cfg["agent_folder"]).is_dir()
+            if (project_path / cfg["skills_folder"]).is_dir()
         )
         if not nightlife_installed:
             error_panel = Panel(
                 f"No Nightlife project found in '[cyan]{project_path}[/cyan]'\n"
-                "No agent folders with Nightlife commands detected. Cannot upgrade.\n\n"
+                "No skills folders with Nightlife skills detected. Cannot upgrade.\n\n"
                 "Use 'nightlife init' without --upgrade to initialize a new project.",
                 title="[red]Upgrade Failed[/red]",
                 border_style="red",
@@ -227,21 +227,21 @@ def init(
 
         is_upgrade_mode = True
 
-    # Detect existing agent folders for backup (for both upgrade and merge modes)
+    # Detect existing platform folders for backup (for both upgrade and merge modes)
     if is_upgrade_mode or merge_into_existing:
-        # Detect existing agent folders (backup root/parent folder, not subfolders)
-        # Examples: backup .github/ (parent), not .github/agents/ (subfolder)
-        #           backup .claude/ (parent), not .claude/commands/ (subfolder)
-        # Track root folders to avoid duplicates (e.g., .github has both agents/ and prompts/)
+        # Detect existing platform folders (backup root/parent folder, not subfolders)
+        # Examples: backup .github/ (parent), not .github/skills/ (subfolder)
+        #           backup .claude/ (parent), not .claude/skills/ (subfolder)
+        # Track root folders to avoid duplicates (e.g., .github has both skills/ and agents/)
         detected_roots = set()
         for agent_key, agent_config in AGENT_CONFIG.items():
-            # Extract root/parent folder from the full path
-            # E.g., ".claude" from ".claude/commands/"
-            # E.g., ".github" from ".github/agents/"
-            agent_folder_path = agent_config["agent_folder"]
-            root_folder = Path(agent_folder_path).parts[0]
+            # Extract root/parent folder from the skills_folder path
+            # E.g., ".claude" from ".claude/skills/"
+            # E.g., ".github" from ".github/skills/"
+            skills_folder_path = agent_config["skills_folder"]
+            root_folder = Path(skills_folder_path).parts[0]
             root_folder_path = project_path / root_folder
-            
+
             # Only add if root folder exists and hasn't been added yet
             # This ensures we backup parent directories (.claude/, .github/), not subfolders
             if root_folder_path.exists() and root_folder not in detected_roots:
@@ -258,15 +258,15 @@ def init(
         if is_upgrade_mode:
             warning_lines.extend([
                 "The following will be [bold red]completely replaced[/bold red]:",
-                "  • Agent command folders (commands, templates, scripts)",
+                "  • Agent skills and subagent folders",
             ])
         else:
-            warning_lines.append("Existing agent folders will be backed up before merging:")
+            warning_lines.append("Existing platform folders will be backed up before merging:")
 
         if existing_agents:
-            warning_lines.append("  • Detected agent folders:")
-            for _, agent_name, agent_folder in existing_agents:
-                warning_lines.append(f"    - {agent_folder}")
+            warning_lines.append("  • Detected platform folders:")
+            for _, agent_name, platform_folder in existing_agents:
+                warning_lines.append(f"    - {platform_folder}")
 
         warning_lines.extend([
             "",
@@ -332,17 +332,17 @@ def init(
             config1 = AGENT_CONFIG.get(ai1)
             for ai2 in selected_ais[i+1:]:
                 config2 = AGENT_CONFIG.get(ai2)
-                
-                # Check for overlapping agent folders
-                path1 = Path(config1["agent_folder"])
-                path2 = Path(config2["agent_folder"])
-                
+
+                # Check for overlapping skills folders
+                path1 = Path(config1["skills_folder"])
+                path2 = Path(config2["skills_folder"])
+
                 try:
                     if path1 in path2.parents or path2 in path1.parents:
-                        overlapping_agents.append((config1["name"], config1["agent_folder"], config2["name"], config2["agent_folder"]))
+                        overlapping_agents.append((config1["name"], config1["skills_folder"], config2["name"], config2["skills_folder"]))
                 except ValueError:
                     pass
-        
+
         if overlapping_agents:
             warning_lines = [
                 "[yellow]Note:[/yellow] Some selected agents use overlapping folder structures:",
@@ -353,10 +353,10 @@ def init(
             warning_lines.extend([
                 "",
                 "Files will be merged into shared folders. This is supported but may cause",
-                "command name conflicts if both agents use similar naming conventions.",
+                "skill name conflicts if both agents use similar naming conventions.",
                 ""
             ])
-            
+
             console.print()
             console.print(Panel("\n".join(warning_lines), title="[yellow]Overlapping Folders Detected[/yellow]", border_style="yellow", padding=(1, 2)))
 
@@ -442,19 +442,19 @@ def init(
                     shutil.copytree(jules_skills, backup_jules_skills)
                     backup_paths["skills"] = backup_jules_skills
 
-                # Backup existing agent folders (parent/root folders, not subfolders)
+                # Backup existing platform folders (parent/root folders, not subfolders)
                 # This backs up entire parent directories like .github/, .claude/, .cursor/
-                # NOT just subfolders like .github/agents/ or .claude/commands/
-                for agent_key, agent_name, agent_folder in existing_agents:
-                    source_folder = project_path / agent_folder
+                # NOT just subfolders like .github/skills/ or .claude/skills/
+                for agent_key, agent_name, platform_folder in existing_agents:
+                    source_folder = project_path / platform_folder
                     if source_folder.exists():
-                        # agent_folder is already the root (e.g., ".github", ".claude")
+                        # platform_folder is already the root (e.g., ".github", ".claude")
                         # Remove trailing slash/backslash for backup name (cross-platform)
-                        folder_name = agent_folder.rstrip('/\\')
+                        folder_name = platform_folder.rstrip('/\\')
                         backup_folder = project_path / f"{folder_name}.backup.{timestamp}"
                         # Copy entire parent directory tree
                         shutil.copytree(source_folder, backup_folder)
-                        backup_paths[agent_folder] = backup_folder
+                        backup_paths[platform_folder] = backup_folder
 
                 backup_count = len(backup_paths)
                 tracker.complete("backup", f"{backup_count} folder{'s' if backup_count != 1 else ''} backed up")
@@ -545,10 +545,12 @@ def init(
     # Agent folder security notice
     agent_config = AGENT_CONFIG.get(selected_ais[-1])  # Use last selected AI for the notice
     if agent_config:
-        agent_folder = agent_config["agent_folder"]
+        skills_folder = agent_config["skills_folder"]
+        # Derive the platform root folder (e.g., ".claude" from ".claude/skills/")
+        platform_root = Path(skills_folder).parts[0]
         security_notice = Panel(
             f"Some agents may store credentials, auth tokens, or other identifying and private artifacts in the agent folder within your project.\n"
-            f"Consider adding [cyan]{agent_folder}[/cyan] (or parts of it) to [cyan].gitignore[/cyan] to prevent accidental credential leakage.",
+            f"Consider adding [cyan]{platform_root}/[/cyan] (or parts of it) to [cyan].gitignore[/cyan] to prevent accidental credential leakage.",
             title="[yellow]Agent Folder Security[/yellow]",
             border_style="yellow",
             padding=(1, 2)
