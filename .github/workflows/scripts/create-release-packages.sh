@@ -55,8 +55,12 @@ build_template_package() {
     echo "Warning: templates directory not found"
   fi
 
-  # Create the zip file
-  ( cd "$base_dir" && zip -r "../nightlife-template-${NEW_VERSION}.zip" . )
+  # Create the zip file with explicit contents (avoid hidden files)
+  local zip_args=()
+  [[ -d "$base_dir/skills" ]] && zip_args+=(skills)
+  [[ -d "$base_dir/agents" ]] && zip_args+=(agents)
+  [[ -d "$base_dir/templates" ]] && zip_args+=(templates)
+  ( cd "$base_dir" && zip -r "../nightlife-template-${NEW_VERSION}.zip" "${zip_args[@]}" )
   echo "Created $GENRELEASES_DIR/nightlife-template-${NEW_VERSION}.zip"
 }
 

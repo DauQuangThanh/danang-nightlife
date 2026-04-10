@@ -249,12 +249,22 @@ def copy_local_template(
     agent_file_template = source_path / "templates" / "agent-file-template.md"
     if agent_file_template.exists():
         template_content = agent_file_template.read_text()
-        for agent_doc_file in ["CLAUDE.md", "AGENTS.md"]:
-            doc_path = project_path / agent_doc_file
-            if not doc_path.exists():
-                doc_path.write_text(template_content)
-                if verbose and not tracker:
-                    console.print(f"[green]✓[/green] Created {agent_doc_file}")
+    else:
+        # Fallback content when template is not in the release package
+        template_content = (
+            "# Agent Personas and Protocols\n\n"
+            "## Overview\n"
+            "This project utilizes an agentic workflow.\n"
+        )
+        if verbose and not tracker:
+            console.print("[yellow]Warning:[/yellow] agent-file-template.md not found in release, using default content")
+
+    for agent_doc_file in ["CLAUDE.md", "AGENTS.md"]:
+        doc_path = project_path / agent_doc_file
+        if not doc_path.exists():
+            doc_path.write_text(template_content)
+            if verbose and not tracker:
+                console.print(f"[green]✓[/green] Created {agent_doc_file}")
 
     if tracker:
         tracker.complete(f"copy-{ai_assistant}", "templates copied")
