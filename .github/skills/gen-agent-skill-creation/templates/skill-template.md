@@ -1,7 +1,7 @@
 ---
 name: skill-name
 description: "[Active Verbs]. Use when [Specific Scenarios] or when user mentions [Keywords]."
-license: Internal use, an Fpt Software Intellectual Property
+license: MIT
 metadata:
   author: Your Name
   version: "1.0"

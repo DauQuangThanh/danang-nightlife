@@ -2,27 +2,23 @@
 
 **Build your first project with Spec-Driven Development in 9 steps.**
 
-> **Note:** Scripts are now Python-based for cross-platform compatibility.
-
 ---
 
 ## 🎯 The Workflow
 
-Follow this order for best results:
+Follow this order for best results. Tell your AI agent what you want to do and it will automatically pick the right skill — or reference the skill by name explicitly.
 
-> **💡 Automatic Version Control:** All Nightlife commands automatically generate appropriate git commit messages and commit changes upon completion using semantic commit prefixes (`docs:`, `feat:`, `test:`, `chore:`).
-
-| Step | Command | Purpose |
-| ------ | --------- |----------|
-| 1️⃣ | `/nightlife.set-ground-rules` | Set ground rules (or use `/nightlife.assess-context` for existing projects) |
-| 2️⃣ | `/nightlife.specify` | Define requirements |
-| 3️⃣ | `/nightlife.clarify` | Clarify unclear requirements |
-| 4️⃣ | `/nightlife.architect` | Design system architecture |
-| 5️⃣ | `/nightlife.standardize` | Create coding standards |
-| 6️⃣ | `/nightlife.design` | Create implementation plan |
-| 7️⃣ | `/nightlife.taskify` | Break down into tasks |
-| 8️⃣ | `/nightlife.analyze` | Validate consistency and coverage |
-| 9️⃣ | `/nightlife.implement` | Build it! |
+| Step | Skill | Purpose |
+| ------ | ------- | --------- |
+| 1️⃣ | `gen-project-ground-rules-setup` | Set ground rules (or `gen-codebase-assessment` for existing projects) |
+| 2️⃣ | `gen-requirement-development` | Define requirements |
+| 3️⃣ | `gen-requirement-clarification` | Clarify unclear requirements |
+| 4️⃣ | `gen-architecture-design` | Design system architecture *(optional, product-level)* |
+| 5️⃣ | `gen-coding-standards` | Create coding standards *(optional, product-level)* |
+| 6️⃣ | `gen-technical-detailed-design` | Create implementation plan |
+| 7️⃣ | `gen-coding-plan` | Break down into tasks |
+| 8️⃣ | `gen-project-consistency-analysis` | Validate consistency and coverage |
+| 9️⃣ | `gen-code-implementation` | Build it! |
 
 > **💡 Smart Context:** Nightlife automatically detects your active feature from your Git branch (like `001-feature-name`). To work on different features, just switch branches.
 
@@ -46,13 +42,11 @@ uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife i
 
 ### Step 2: Set Your Rules
 
-In your AI agent, use the `/nightlife.set-ground-rules` command to set project principles:
+Tell your AI agent to set up ground rules:
 
-```bash
-/nightlife.set-ground-rules This project follows a "Library-First" approach. All features must be implemented as standalone libraries first. We use TDD strictly. We prefer functional programming patterns.
-```
+> *"Use the `gen-project-ground-rules-setup` skill. This project follows a 'Library-First' approach. All features must be implemented as standalone libraries first. We use TDD strictly. We prefer functional programming patterns."*
 
-**What this does:** Creates ground rules that guide all future development decisions.
+**What this does:** Creates `docs/ground-rules.md` with principles that guide all future development decisions.
 
 ---
 
@@ -60,19 +54,15 @@ In your AI agent, use the `/nightlife.set-ground-rules` command to set project p
 
 Describe **what** you want (not **how** to build it):
 
-```bash
-/nightlife.specify Build a photo organizer app. Albums are grouped by date and can be reorganized by drag-and-drop. Each album shows photos in a tile view. No nested albums allowed.
-```
+> *"Use the `gen-requirement-development` skill. Build a photo organizer app. Albums are grouped by date and can be reorganized by drag-and-drop. Each album shows photos in a tile view. No nested albums allowed."*
 
-**Focus on:** User needs, features, and behavior—skip tech stack details for now.
+**Focus on:** User needs, features, and behavior — skip tech stack details for now.
 
 ### Step 4: Design System Architecture *(Optional)*
 
 Document your overall system design (do this once per product):
 
-```bash
-/nightlife.architect Document the system architecture including C4 diagrams, microservices design, and technology stack decisions.
-```
+> *"Use the `gen-architecture-design` skill. Document the system architecture including C4 diagrams, microservices design, and technology stack decisions."*
 
 ---
 
@@ -80,9 +70,7 @@ Document your overall system design (do this once per product):
 
 Create team coding conventions (do this once per product):
 
-```bash
-/nightlife.standardize Create comprehensive coding standards for TypeScript and React, including naming conventions and best practices.
-```
+> *"Use the `gen-coding-standards` skill. Create comprehensive coding standards for TypeScript and React, including naming conventions and best practices."*
 
 ---
 
@@ -90,9 +78,7 @@ Create team coding conventions (do this once per product):
 
 Clarify any unclear requirements:
 
-```bash
-/nightlife.clarify Focus on security and performance requirements.
-```
+> *"Use the `gen-requirement-clarification` skill. Focus on security and performance requirements."*
 
 ---
 
@@ -100,9 +86,7 @@ Clarify any unclear requirements:
 
 Now specify **how** to build it (tech stack and architecture):
 
-```bash
-/nightlife.design Use Vite with minimal libraries. Stick to vanilla HTML, CSS, and JavaScript. Store metadata in local SQLite. No image uploads.
-```
+> *"Use the `gen-technical-detailed-design` skill. Use Vite with minimal libraries. Stick to vanilla HTML, CSS, and JavaScript. Store metadata in local SQLite. No image uploads."*
 
 **What to include:** Tech stack, frameworks, libraries, database choices, architecture patterns.
 
@@ -112,21 +96,15 @@ Now specify **how** to build it (tech stack and architecture):
 
 **Create tasks:**
 
-```bash
-/nightlife.taskify
-```
+> *"Use the `gen-coding-plan` skill."*
 
 **Validate the plan (optional):**
 
-```bash
-/nightlife.analyze
-```
+> *"Use the `gen-project-consistency-analysis` skill."*
 
 **Build it:**
 
-```bash
-/nightlife.implement
-```
+> *"Use the `gen-code-implementation` skill."*
 
 **What happens:** Your AI agent executes all tasks in order, building your application according to the plan.
 
@@ -138,40 +116,25 @@ Now specify **how** to build it (tech stack and architecture):
 
 ### 1. Set Ground Rules
 
-```bash
-/nightlife.set-ground-rules Taskify is "Security-First". Validate all user inputs. Use microservices architecture. Document all code thoroughly.
-```
+> *"Use the `gen-project-ground-rules-setup` skill. Taskify is 'Security-First'. Validate all user inputs. Use microservices architecture. Document all code thoroughly."*
 
 ### 2. Define Requirements
 
-```bash
-/nightlife.specify Build Taskify, a team productivity platform. Users can create projects, add team members, assign tasks, comment, and move tasks between Kanban boards. Start with 5 predefined users: 1 product manager and 4 engineers. Create 3 sample projects. Use standard Kanban columns: To Do, In Progress, In Review, Done. No login required for this initial version.
-```
+> *"Use the `gen-requirement-development` skill. Build Taskify, a team productivity platform. Users can create projects, add team members, assign tasks, comment, and move tasks between Kanban boards. Start with 5 predefined users: 1 product manager and 4 engineers. Create 3 sample projects. Use standard Kanban columns: To Do, In Progress, In Review, Done. No login required for this initial version."*
 
 ### 3. Refine with Details
 
-```bash
-/nightlife.clarify For task cards: users can change status by dragging between columns, leave unlimited comments, and assign tasks to any user. Show a user picker on launch. Clicking a user shows their projects. Clicking a project opens the Kanban board. Highlight tasks assigned to current user in different color. Users can edit/delete only their own comments.
-```
+> *"Use the `gen-requirement-clarification` skill. For task cards: users can change status by dragging between columns, leave unlimited comments, and assign tasks to any user. Show a user picker on launch. Clicking a user shows their projects. Clicking a project opens the Kanban board. Highlight tasks assigned to current user in different color. Users can edit/delete only their own comments."*
 
-### 4. Validate Specification
+### 4. Create Technical Plan
 
-```bash
-/nightlife.checklist
-```
+> *"Use the `gen-technical-detailed-design` skill. Use .NET Aspire with Postgres database. Frontend: Blazor server with drag-and-drop and real-time updates. Create REST APIs for projects, tasks, and notifications."*
 
-### 5. Create Technical Plan
+### 5. Validate and Build
 
-```bash
-/nightlife.design Use .NET Aspire with Postgres database. Frontend: Blazor server with drag-and-drop and real-time updates. Create REST APIs for projects, tasks, and notifications.
-```
+> *"Use the `gen-project-consistency-analysis` skill."*
 
-### 6. Validate and Build
-
-```bash
-/nightlife.analyze
-/nightlife.implement
-```
+> *"Use the `gen-code-implementation` skill."*
 
 ---
 
@@ -191,8 +154,8 @@ Now specify **how** to build it (tech stack and architecture):
 
 **Learn more:**
 
-- 📖 [Complete Methodology](../spec-driven.md) - Deep dive into the full process
-- 🔍 [More Examples](../templates) - Explore sample projects
+- 📖 [Installation Guide](installation.md) - Detailed setup options
+- 🔍 [Upgrade Guide](upgrade.md) - Update to the latest version
 - 💻 [Source Code](https://github.com/dauquangthanh/danang-nightlife) - Contribute to the project
 
 **Get help:**

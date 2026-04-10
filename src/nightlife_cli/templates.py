@@ -197,15 +197,9 @@ def copy_local_template(
                         since every agent folder is independently self-contained.
     """
 
-    # Paths to copy
-    commands_dir = source_path / "agent-commands"
+    # Source directories
+    agents_src_dir = source_path / "agents"
     skills_dir = source_path / "skills"
-    scripts_dir = source_path / "scripts"
-
-    # Commands directory is optional - skills-only installs are valid
-    has_commands = commands_dir.is_dir() and any(
-        item for item in commands_dir.iterdir() if item.is_dir()
-    )
 
     if verbose and not tracker:
         console.print(f"[cyan]Copying templates from:[/cyan] {source_path}")
@@ -221,94 +215,46 @@ def copy_local_template(
 
     agent_folder = agent_config["agent_folder"]
     skills_folder = agent_config["skills_folder"]
+    subagents_folder = agent_config.get("subagents_folder")
 
-    agent_ext = EXTENSION_MAP.get(ai_assistant, ".md")
-    args_format = ARGS_FORMAT_MAP.get(ai_assistant, "$ARGUMENTS")
-
-    # Create agent-specific command directory.
-    # Note: Multiple agents can share the same agent_folder (e.g., Auggie CLI, SHAI).
-    # Using exist_ok=True allows peaceful coexistence - each agent's commands are
-    # prefixed with "nightlife." and use agent-specific extensions, preventing conflicts.
+    # Ensure agent root directory exists
     agent_path = project_path / agent_folder
     agent_path.mkdir(parents=True, exist_ok=True)
 
-    # Copy command files, their per-command templates, and shared-templates
-    # into the agent directory. Layout:
-    #   [agent_folder]/nightlife.<cmd>.<ext>       ← command file
-    #   [agent_folder]/<cmd>/<template-file>        ← command-specific templates
-    #   [agent_folder]/shared-templates/<file>      ← shared assets (e.g. agent-file-template.md)
-    for cmd_subdir in (commands_dir.iterdir() if has_commands else []):
-        if not cmd_subdir.is_dir():
-            continue
+    # Install subagents from agents/ directory into the platform's subagents folder.
+    # GitHub Copilot (IDE and CLI) uses .agent.md; all other platforms use .md.
+    if agents_src_dir.exists() and subagents_folder:
+        subagents_path = project_path / subagents_folder
+        subagents_path.mkdir(parents=True, exist_ok=True)
+        subagent_ext = ".agent.md" if ai_assistant in ("copilot", "copilot-cli") else ".md"
+        for agent_file in sorted(agents_src_dir.iterdir()):
+            if agent_file.is_file() and agent_file.suffix == ".md":
+                dest_file = subagents_path / f"{agent_file.stem}{subagent_ext}"
+                shutil.copy2(agent_file, dest_file)
+                if verbose and not tracker:
+                    console.print(f"[green]✓[/green] Installed subagent {dest_file.name} → {subagents_folder}")
 
-        # shared-templates: copy all non-JSON assets to [agent_folder]/shared-templates/
-        if cmd_subdir.name == "shared-templates":
-            dest_shared = agent_path / "shared-templates"
-            dest_shared.mkdir(exist_ok=True)
-            for f in cmd_subdir.iterdir():
-                if f.is_file() and f.name != "vscode-settings.json":
-                    shutil.copy2(f, dest_shared / f.name)
-            continue
-
-        cmd_file = cmd_subdir / f"{cmd_subdir.name}.md"
-        if not cmd_file.exists():
-            continue
-
-        # Read and process the command file
-        content = cmd_file.read_text()
-        content = _process_command_content(content, ai_assistant, agent_folder, cmd_subdir.name)
-        content = content.replace("{ARGS}", args_format)
-        content = content.replace("$ARGUMENTS", args_format)
-        content = content.replace("__AGENT__", ai_assistant)
-
-        # Write to agent directory with appropriate extension
-        output_file = agent_path / f"nightlife.{cmd_file.stem}{agent_ext}"
-        output_file.write_text(content)
-
-        # Copy per-command template files AND subdirectories (e.g. scripts/) into
-        # [agent_folder]/<cmd>/ so agent files can reference them with relative paths
-        dest_tmpl_dir = agent_path / cmd_subdir.name
-        any_cmd_content = False
-        for item in cmd_subdir.iterdir():
-            if item.name == f"{cmd_subdir.name}.md":
-                continue
-            if not any_cmd_content:
-                dest_tmpl_dir.mkdir(exist_ok=True)
-                any_cmd_content = True
-            if item.is_file():
-                shutil.copy2(item, dest_tmpl_dir / item.name)
-            elif item.is_dir():
-                shutil.copytree(item, dest_tmpl_dir / item.name, dirs_exist_ok=True)
-
-    if verbose and not tracker:
-        console.print(f"[green]✓[/green] Created {ai_assistant} commands in {agent_folder}")
-
-    # Copy skills to agent-specific skills folder
+    # Copy skills to agent-specific skills folder.
+    # Use dirs_exist_ok=True to merge when multiple agents share the same skills_folder.
     if skills_dir.exists():
         skills_path = project_path / skills_folder
         skills_path.mkdir(parents=True, exist_ok=True)
-
-        # Copy all skills subdirectories
-        # Use dirs_exist_ok=True to merge instead of replace when multiple agents
-        # share the same skills_folder (e.g., Auggie CLI uses .augment/rules/ for both)
         for skill_item in skills_dir.iterdir():
             if skill_item.is_dir():
-                dest_skill = skills_path / skill_item.name
-                shutil.copytree(skill_item, dest_skill, dirs_exist_ok=True)
-
+                shutil.copytree(skill_item, skills_path / skill_item.name, dirs_exist_ok=True)
         if verbose and not tracker:
             console.print(f"[green]✓[/green] Created {ai_assistant} skills in {skills_folder}")
 
-    # Handle agent-specific extras (e.g., vscode-settings.json for Copilot)
-    if ai_assistant == "copilot":
-        vscode_dir = project_path / ".vscode"
-        vscode_dir.mkdir(exist_ok=True)
-        vscode_settings_src = commands_dir / "shared-templates" / "vscode-settings.json"
-        if vscode_settings_src.exists():
-            dest_file = vscode_dir / "settings.json"
-            handle_vscode_settings(vscode_settings_src, dest_file, Path(".vscode/settings.json"), verbose, tracker)
-            if verbose and not tracker:
-                console.print(f"[green]✓[/green] Created .vscode/settings.json")
+    # Create CLAUDE.md and AGENTS.md in the project root if they don't exist
+    agent_file_template = source_path / "templates" / "agent-file-template.md"
+    if agent_file_template.exists():
+        template_content = agent_file_template.read_text()
+        for agent_doc_file in ["CLAUDE.md", "AGENTS.md"]:
+            doc_path = project_path / agent_doc_file
+            if not doc_path.exists():
+                doc_path.write_text(template_content)
+                if verbose and not tracker:
+                    console.print(f"[green]✓[/green] Created {agent_doc_file}")
 
     if tracker:
         tracker.complete(f"copy-{ai_assistant}", "templates copied")

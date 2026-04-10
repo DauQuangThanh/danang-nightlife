@@ -11,7 +11,7 @@ Before installing, make sure you have:
 | Requirement | Description |
 | ------------- | ------------- |
 | **Operating System** | Linux, macOS, or Windows (PowerShell supported) |
-| **AI Assistant** | [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), or [CodeBuddy CLI](https://www.codebuddy.ai/cli) |
+| **AI Assistant** | Any [supported agent](../README.md#-supported-ai-agents) — Claude Code, GitHub Copilot, Gemini CLI, Cursor, Windsurf, and 20 more |
 | **Package Manager** | [uv](https://docs.astral.sh/uv/) |
 | **Python** | [Version 3.11 or higher](https://www.python.org/downloads/) |
 | **Version Control** | [Git](https://git-scm.com/downloads) |
@@ -42,7 +42,7 @@ uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife i
 
 ### 🤖 Choose Your AI Agent
 
-Specify which AI assistant to use:
+Specify which AI assistant to use with `--ai`. See the full list of [supported agents](../README.md#-supported-ai-agents) for all 25 platform keys.
 
 ```bash
 # Claude Code
@@ -51,11 +51,17 @@ uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife i
 # Gemini CLI
 uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai gemini
 
-# GitHub Copilot
+# GitHub Copilot (IDE)
 uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai copilot
 
-# CodeBuddy CLI
-uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai codebuddy
+# GitHub Copilot CLI
+uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai copilot-cli
+
+# Cursor
+uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai cursor-agent
+
+# Multiple agents at once
+uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife init <project_name> --ai claude,copilot,gemini
 ```
 
 ### 🔧 Script Type (Python)
@@ -83,30 +89,38 @@ uvx --from git+https://github.com/dauquangthanh/danang-nightlife.git nightlife i
 
 After setup, check that everything works:
 
-### 1. Check for Slash Commands
+### 1. Check Agent Skills
 
-Your AI agent should show these core commands:
-
-**Core Workflow:**
-
-| Command | Purpose |
-| --------- | ---------- |
-| `/nightlife.set-ground-rules` | Set project principles |
-| `/nightlife.specify` | Create specifications |
-| `/nightlife.design` | Generate implementation plans |
-| `/nightlife.taskify` | Break down into actionable tasks |
-| `/nightlife.implement` | Execute the plan |
-
-### 2. Check Script Files
-
-Each command's scripts live inside the agent folder, e.g.:
+Confirm the skills folder was created for your chosen agent:
 
 ```bash
-ls .claude/commands/specify/scripts/    # Claude Code
-ls .github/agents/specify/scripts/     # GitHub Copilot
+ls .claude/skills/          # Claude Code
+ls .github/skills/          # GitHub Copilot
+ls .gemini/skills/          # Gemini CLI
+ls .cursor/skills/          # Cursor
 ```
 
-- ✅ Python scripts (`.py`) for cross-platform execution, one `scripts/` folder per command
+**Core skills installed:**
+
+| Skill | Purpose |
+| ------- | ---------- |
+| `gen-project-ground-rules-setup` | Set project principles |
+| `gen-requirement-development` | Create feature specifications |
+| `gen-technical-detailed-design` | Generate implementation plans |
+| `gen-coding-plan` | Break down into actionable tasks |
+| `gen-code-implementation` | Execute the plan |
+
+### 2. Check Subagents
+
+Confirm platform-specific subagents were installed:
+
+```bash
+ls .claude/agents/          # Claude Code
+ls .github/agents/          # GitHub Copilot
+ls .gemini/agents/          # Gemini CLI
+```
+
+- ✅ `business-analyst.md` (or `business-analyst.agent.md` for Copilot) should be present
 
 ---
 

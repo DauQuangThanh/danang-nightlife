@@ -36,7 +36,7 @@ client = httpx.Client(verify=ssl_context)
 @app.command()
 def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
-    ai_assistant: str = typer.Option(None, "--ai", help="AI agent(s) to use. Can be a single agent or comma-separated list (e.g., 'claude,gemini,copilot'). Valid options: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, codebuddy, roo, amp, shai, q, bob, jules, qoder, antigravity. If not specified, an interactive multi-select menu will appear (default: copilot pre-selected)"),
+    ai_assistant: str = typer.Option(None, "--ai", help="AI agent(s) to use. Can be a single agent or comma-separated list (e.g., 'claude,gemini,copilot'). Valid options: amp, antigravity, auggie, bob, claude, cline, codebuddy, codex, copilot, copilot-cli, cursor-agent, forge, gemini, junie, kilocode, kiro, opencode, pi, qoder, qwen, roo, tabnine, trae, vibe, windsurf. If not specified, an interactive multi-select menu will appear (default: copilot pre-selected)"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
@@ -57,7 +57,7 @@ def init(
     3. Download the appropriate template(s) from GitHub (or use local templates)
     4. Extract the template to a new project directory or current directory
     5. Initialize a fresh git repository (if not --no-git and no existing repo)
-    6. Set up AI assistant commands for all selected agents
+    6. Set up AI agent skills for all selected agents
 
     Examples:
         # Basic project initialization (interactive multi-agent selection)
@@ -579,31 +579,31 @@ def init(
         steps_lines.append(f"{step_num}. Set [cyan]CODEX_HOME[/cyan] environment variable before running Codex: [cyan]{cmd}[/cyan]")
         step_num += 1
 
-    steps_lines.append(f"{step_num}. Start using slash commands with your AI agent (in order):")
+    steps_lines.append(f"{step_num}. Start using agent skills with your AI agent (in order):")
     steps_lines.append("")
     steps_lines.append("   [bold cyan]Core Workflow:[/bold cyan]")
-    steps_lines.append("   • [cyan]/nightlife.set-ground-rules[/] - Establish project principles (ground rules)")
-    steps_lines.append("   • [cyan]/nightlife.specify[/] - Create feature specification")
-    steps_lines.append("   • [cyan]/nightlife.architect[/] [dim](optional, product-level)[/dim] - Define system architecture")
-    steps_lines.append("   • [cyan]/nightlife.standardize[/] [dim](optional, product-level)[/dim] - Establish coding standards")
-    steps_lines.append("   • [cyan]/nightlife.design[/] - Create technical implementation plan")
-    steps_lines.append("   • [cyan]/nightlife.taskify[/] - Generate actionable tasks")
-    steps_lines.append("   • [cyan]/nightlife.implement[/] - Execute implementation")
+    steps_lines.append("   • [cyan]gen-project-ground-rules-setup[/] - Establish project principles (ground rules)")
+    steps_lines.append("   • [cyan]gen-requirement-development[/] - Create feature specification")
+    steps_lines.append("   • [cyan]gen-architecture-design[/] [dim](optional, product-level)[/dim] - Define system architecture")
+    steps_lines.append("   • [cyan]gen-coding-standards[/] [dim](optional, product-level)[/dim] - Establish coding standards")
+    steps_lines.append("   • [cyan]gen-technical-detailed-design[/] - Create technical implementation plan")
+    steps_lines.append("   • [cyan]gen-coding-plan[/] - Generate actionable tasks")
+    steps_lines.append("   • [cyan]gen-code-implementation[/] - Execute implementation")
 
     steps_panel = Panel("\n".join(steps_lines), title="Next Steps", border_style="cyan", padding=(1,2))
     console.print()
     console.print(steps_panel)
 
     enhancement_lines = [
-        "Optional commands for quality & validation [bright_black](use as needed)[/bright_black]",
+        "Optional skills for quality & validation [bright_black](use as needed)[/bright_black]",
         "",
-        f"○ [cyan]/nightlife.clarify[/] - Ask structured questions before planning (run before [cyan]/nightlife.design[/])",
-        f"○ [cyan]/nightlife.analyze[/] - Cross-artifact consistency report (after [cyan]/nightlife.taskify[/], before [cyan]/nightlife.implement[/])",
-        f"○ [cyan]/nightlife.checklist[/] - Generate quality checklists (after [cyan]/nightlife.design[/])",
-        f"○ [cyan]/nightlife.design-e2e-test[/] - Design end-to-end test specs (product-level)",
-        f"○ [cyan]/nightlife.perform-e2e-test[/] - Execute E2E tests and generate reports"
+        f"○ [cyan]gen-requirement-clarification[/] - Ask structured questions before planning (run before [cyan]gen-technical-detailed-design[/])",
+        f"○ [cyan]gen-project-consistency-analysis[/] - Cross-artifact consistency report (after [cyan]gen-coding-plan[/], before [cyan]gen-code-implementation[/])",
+        f"○ [cyan]gen-codebase-assessment[/] - Assess existing codebase before implementation",
+        f"○ [cyan]gen-code-review[/] - Review code for quality, simplicity, and maintainability",
+        f"○ [cyan]gen-security-review[/] - Review code for security vulnerabilities (OWASP Top 10)"
     ]
-    enhancements_panel = Panel("\n".join(enhancement_lines), title="Quality & Enhancement Commands", border_style="cyan", padding=(1,2))
+    enhancements_panel = Panel("\n".join(enhancement_lines), title="Quality & Enhancement Skills", border_style="cyan", padding=(1,2))
     console.print()
     console.print(enhancements_panel)
 

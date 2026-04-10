@@ -44,16 +44,18 @@ Activate this skill when:
 
 **Validation:**
 
-Use the prerequisite checking script to verify required files exist (script provided in `tools/`):
+Use the prerequisite checking script to verify required files exist:
 
 ```bash
-python3 tools/check-prerequisites.py
+bash scripts/check-prerequisites.sh           # macOS/Linux/WSL
+.\scripts\check-prerequisites.ps1             # Windows PowerShell
 ```
 
 **JSON Output (for parsing):**
 
 ```bash
-python3 tools/check-prerequisites.py --json
+bash scripts/check-prerequisites.sh --json    # macOS/Linux/WSL
+.\scripts\check-prerequisites.ps1 -Json       # Windows PowerShell
 ```
 
 **What the script checks:**
@@ -68,8 +70,8 @@ python3 tools/check-prerequisites.py --json
 ### Setup Phase
 
 1. **Run prerequisite script** to detect required files:
-   - Execute `python3 tools/check-prerequisites.py`
-   - Parse JSON output with `--json` flag to get file paths
+   - Execute `bash scripts/check-prerequisites.sh` (or `.\scripts\check-prerequisites.ps1` on Windows)
+   - Parse JSON output with `--json` / `-Json` flag to get file paths
    - Verify `ground-rules.md` exists (required)
    - Note if `architecture.md` exists (highly recommended for tech stack context)
 
@@ -245,41 +247,6 @@ Document these comprehensive standards:
    - Linting tools by language (ESLint, Pylint, Checkstyle, golint), Formatter configs (Prettier, Black, gofmt)
 
 **Output**: Sections 6-10 (Testing, Git, Documentation, Code Quality, Code Style) completed
-
-### Phase 6: Finalization & Quick Reference Guides
-
-**Prerequisites:** Phase 5 complete
-
-**Goal**: Generate enforcement configurations and quick reference guides.
-
-1. **Generate enforcement configs** - `.editorconfig`, Linter configs (`.eslintrc.js`, `.pylintrc`, etc.), Formatter configs (`.prettierrc`, `pyproject.toml`), Pre-commit hooks (Husky, pre-commit)
-
-```python
-# Standard library
-import os
-import sys
-
-# Third-party
-import requests
-import pandas as pd
-
-# Local
-       from .models import User
-       from .services import UserService
-       ```
-
-2. **Code quality standards**:
-   - Complexity limits (cyclomatic <10, cognitive <15)
-   - Length limits (functions <50 lines, files <500 lines)
-   - Duplication thresholds (<3% duplicate code)
-   - Code smell detection (long parameters >5, deep nesting >4, God classes >500 lines/20 methods)
-
-3. **Linting and formatting tools**:
-   - Linter configs per language (ESLint/.eslintrc.js, Pylint/.pylintrc, Checkstyle/checkstyle.xml, golint, RuboCop/.rubocop.yml)
-   - Formatter configs (Prettier/.prettierrc.json, Black/pyproject.toml, gofmt, google-java-format, rustfmt/rustfmt.toml)
-   - Pre-commit hooks (Husky for JS, pre-commit for Python, lefthook) to run linters/formatters before commit
-
-**Output**: Section 10 (Code Style Guide) completed with language-specific configurations
 
 ### Phase 6: Finalization & Quick Reference Guides
 

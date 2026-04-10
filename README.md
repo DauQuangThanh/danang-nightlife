@@ -77,18 +77,18 @@ flowchart LR
     style BF7 fill:#FFD700
 ```
 
-**Greenfield** projects start with establishing principles, architecture, and standards before building features. **Brownfield** projects begin with `/nightlife.assess-context` to understand existing architecture and patterns, then follow a streamlined workflow to add new features while maintaining consistency.
+**Greenfield** projects start with establishing principles, architecture, and standards before building features. **Brownfield** projects begin with `gen-codebase-assessment` to understand existing architecture and patterns, then follow a streamlined workflow to add new features while maintaining consistency.
 
 **Key Differences:**
 
 | Aspect | 🌱 Greenfield | 🏗️ Brownfield |
 |--------|--------------|---------------|
 | **Starting Point** | Empty project | Existing codebase |
-| **Setup Phase** | `/nightlife.set-ground-rules` | `/nightlife.assess-context` (once per project) |
+| **Setup Phase** | `gen-project-ground-rules-setup` | `gen-codebase-assessment` (once per project) |
 | **Focus** | Establish foundations first | Integrate with existing patterns |
 | **Timeline** | 2-4 weeks (MVP) | 1-2 weeks per feature |
 | **Flexibility** | Complete freedom in design | Must maintain consistency |
-| **Commands Used** | Full workflow (9 core + 2 product-level) | Streamlined (7 core commands) |
+| **Skills Used** | Full workflow (9 core + 2 product-level) | Streamlined (7 core skills) |
 
 ### Install Nightlife CLI
 
@@ -143,84 +143,61 @@ uvx --native-tls --from git+https://github.com/dauquangthanh/danang-nightlife.gi
 
 ### Your First Project in 9 Steps
 
-> **💡 Automatic Version Control:** All Nightlife commands automatically generate appropriate git commit messages and commit changes upon completion. Commands use semantic commit prefixes (`docs:`, `feat:`, `test:`, `chore:`) to maintain a clear project history.
+> **💡 How skills work:** Nightlife installs agent skills into your project. Tell your AI assistant what you want to do and it will automatically pick the right skill. You can also reference a skill by name explicitly.
 
 #### 1️⃣ **Set Project Rules**
 
-Launch your AI assistant in the project. You'll see `/nightlife.*` commands available.
+Launch your AI assistant in the project and tell it to set up ground rules:
 
-Create your project's guiding principles:
-
-```bash
-/nightlife.set-ground-rules Create principles for code quality, maintainability, testing, user experience, and performance at an MVP level
-```
+> *"Use the `gen-project-ground-rules-setup` skill. Create principles for code quality, maintainability, testing, user experience, and performance at an MVP level."*
 
 #### 2️⃣ **Write the Specification**
 
 Describe **what** you want to build and **why** (not the tech stack yet):
 
-```bash
-/nightlife.specify Build a photo organizer with albums grouped by date. 
-Users can drag-and-drop albums to reorganize them. Albums show photos in a tile view. 
-No nested albums allowed.
-```
+> *"Use the `gen-requirement-development` skill. Build a photo organizer with albums grouped by date. Users can drag-and-drop albums to reorganize them. Albums show photos in a tile view. No nested albums allowed."*
 
 #### 3️⃣ **Clarify Requirements** *(Recommended)*
 
 Use structured questioning to clarify underspecified areas:
 
-```bash
-/nightlife.clarify Focus on edge cases, data validation, and user experience details
-```
+> *"Use the `gen-requirement-clarification` skill. Focus on edge cases, data validation, and user experience details."*
 
 #### 4️⃣ **Design System Architecture** *(Optional, once per product)*
 
 Document your system architecture:
 
-```bash
-/nightlife.architect Create C4 diagrams, document tech stack decisions and architecture patterns
-```
+> *"Use the `gen-architecture-design` skill. Create C4 diagrams, document tech stack decisions and architecture patterns."*
 
 #### 5️⃣ **Set Coding Standards** *(Optional, once per product)*
 
 Create coding standards for your team:
 
-```bash
-/nightlife.standardize Define naming conventions, file organization, and best practices
-```
+> *"Use the `gen-coding-standards` skill. Define naming conventions, file organization, and best practices."*
 
 #### 6️⃣ **Create Detailed Design**
 
 Now specify **how** to build it (tech stack and architecture):
 
-```bash
-/nightlife.design Use Vite with vanilla HTML, CSS, and JavaScript. 
-Keep libraries minimal. Store metadata in local SQLite. No image uploads.
-```
+> *"Use the `gen-technical-detailed-design` skill. Use Vite with vanilla HTML, CSS, and JavaScript. Keep libraries minimal. Store metadata in local SQLite. No image uploads."*
 
 #### 7️⃣ **Break Down Tasks**
 
 Generate an actionable task list:
 
-```bash
-/nightlife.taskify
-```
+> *"Use the `gen-coding-plan` skill."*
 
 #### 8️⃣ **Validate the Plan** *(Recommended)*
 
 Check consistency and coverage before implementation:
 
-```bash
-/nightlife.analyze
-```
+> *"Use the `gen-project-consistency-analysis` skill."*
 
 #### 9️⃣ **Build It**
 
 Execute all tasks automatically:
 
-```bash
-/nightlife.implement
-```
+> *"Use the `gen-code-implementation` skill."*
 
 #### 🧪 **Test & Iterate**
 
@@ -230,27 +207,33 @@ Run your application and fix any issues. Your AI assistant will help debug.
 
 ## 🤖 Supported AI Agents
 
-| Agent                                                     | Support | Notes                                             |
-| ----------------------------------------------------------- | --------- |---------------------------------------------------|
-| [Amazon Q Developer CLI](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️ | Amazon Q Developer CLI [does not support](https://github.com/aws/amazon-q-developer-cli/issues/3064) custom arguments for slash commands. |
-| [Amp](https://ampcode.com/)                               | ✅ | |
-| [Auggie CLI](https://docs.augmentcode.com/cli/overview)   | ✅ |                                                   |
-| [Claude Code](https://www.anthropic.com/claude-code)      | ✅ |                                                   |
-| [CodeBuddy CLI](https://www.codebuddy.ai/cli)             | ✅ |                                                   |
-| [Codex CLI](https://github.com/openai/codex)              | ✅ |                                                   |
-| [Cursor](https://cursor.sh/)                              | ✅ |                                                   |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | ✅ |                                                   |
-| [GitHub Copilot](https://code.visualstudio.com/)          | ✅ |                                                   |
-| [Google Antigravity](https://ai.google.dev/)              | ✅ | IDE-based agent with slash command support |
-| [IBM Bob](https://www.ibm.com/products/bob)               | ✅ | IDE-based agent with slash command support |
-| [Jules](https://jules.google.com/)                        | ✅ | |
-| [Kilo Code](https://github.com/Kilo-Org/kilocode)         | ✅ |                                                   |
-| [opencode](https://opencode.ai/)                          | ✅ |                                                   |
-| [Qoder CLI](https://qoder.ai)                             | ✅ |                                                   |
-| [Qwen Code](https://github.com/QwenLM/qwen-code)          | ✅ |                                                   |
-| [Roo Code](https://roocode.com/)                          | ✅ |                                                   |
-| [SHAI (OVHcloud)](https://github.com/ovh/shai)            | ✅ | |
-| [Windsurf](https://windsurf.com/)                         | ✅ |                                                   |
+| Agent | Key | Support |
+| ------- | ----- | --------- |
+| [Amp](https://ampcode.com/) | `amp` | ✅ |
+| [Augment Code](https://docs.augmentcode.com/cli/overview) | `auggie` | ✅ |
+| [Claude Code](https://www.anthropic.com/claude-code) | `claude` | ✅ |
+| [Cline](https://github.com/cline/cline) | `cline` | ✅ |
+| [CodeBuddy CLI](https://www.codebuddy.ai/cli) | `codebuddy` | ✅ |
+| [Codex CLI](https://github.com/openai/codex) | `codex` | ✅ |
+| [Cursor](https://cursor.sh/) | `cursor-agent` | ✅ |
+| [Forge](https://forge.ai/) | `forge` | ✅ |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | ✅ |
+| [GitHub Copilot](https://code.visualstudio.com/) | `copilot` | ✅ |
+| [GitHub Copilot CLI](https://cli.github.com/) | `copilot-cli` | ✅ |
+| [Google Antigravity](https://ai.google.dev/) | `antigravity` | ✅ |
+| [IBM Bob](https://www.ibm.com/products/bob) | `bob` | ✅ |
+| [Junie](https://www.jetbrains.com/junie/) | `junie` | ✅ |
+| [Kilo Code](https://github.com/Kilo-Org/kilocode) | `kilocode` | ✅ |
+| [Kiro](https://kiro.dev/) | `kiro` | ✅ |
+| [Mistral Vibe](https://mistral.ai/) | `vibe` | ✅ |
+| [opencode](https://opencode.ai/) | `opencode` | ✅ |
+| [Pi Agent](https://pi.ai/) | `pi` | ✅ |
+| [Qoder CLI](https://qoder.ai) | `qoder` | ✅ |
+| [Qwen Code](https://github.com/QwenLM/qwen-code) | `qwen` | ✅ |
+| [Roo Code](https://roocode.com/) | `roo` | ✅ |
+| [Tabnine](https://www.tabnine.com/) | `tabnine` | ✅ |
+| [Trae](https://trae.ai/) | `trae` | ✅ |
+| [Windsurf](https://windsurf.com/) | `windsurf` | ✅ |
 
 ## 🔧 Nightlife CLI Reference
 
@@ -261,7 +244,7 @@ The `nightlife` command supports the following options:
 | Command     | Description                                                    |
 | ------------- | ---------------------------------------------------------------- |
 | `init`      | Initialize a new Nightlife project from the latest template      |
-| `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, `shai`, `q`, `bob`, `jules`, `qoder`, `antigravity`) |
+| `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, and all supported agent CLIs) |
 | `version`   | Display CLI version, template version, and system information  |
 
 ### `nightlife init` Arguments & Options
@@ -269,8 +252,7 @@ The `nightlife` command supports the following options:
 | Argument/Option        | Type     | Description                                                                  |
 | ------------------------ | ---------- |------------------------------------------------------------------------------|
 | `<project-name>`       | Argument | Name for your new project directory (optional if using `--here`, or use `.` for current directory) |
-| `--ai`                 | Option   | AI assistant(s) to use. Can be a single agent or comma-separated list (e.g., `claude,gemini,copilot`). Valid options: `claude`, `gemini`, `copilot`, `cursor-agent`, `qwen`, `opencode`, `codex`, `windsurf`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, `shai`, `q`, `bob`, `jules`, `qoder`, `antigravity`. If not specified, an interactive multi-select menu will appear |
-| `--script`             | Option   | Script variant to use: `py` (Python) - cross-platform default                 |
+| `--ai`                 | Option   | AI assistant(s) to use. Can be a single agent or comma-separated list (e.g., `claude,gemini,copilot`). Valid options: `amp`, `antigravity`, `auggie`, `bob`, `claude`, `cline`, `codebuddy`, `codex`, `copilot`, `copilot-cli`, `cursor-agent`, `forge`, `gemini`, `junie`, `kilocode`, `kiro`, `opencode`, `pi`, `qoder`, `qwen`, `roo`, `tabnine`, `trae`, `vibe`, `windsurf`. If not specified, an interactive multi-select menu will appear |
 | `--ignore-agent-tools` | Flag     | Skip checks for AI agent tools like Claude Code                             |
 | `--no-git`             | Flag     | Skip git repository initialization                                          |
 | `--here`               | Flag     | Initialize project in the current directory instead of creating a new one   |
@@ -332,29 +314,34 @@ nightlife check
 nightlife version
 ```
 
-### Available Slash Commands
+### Available Agent Skills
 
-After running `nightlife init`, your AI coding agent will have access to **15 slash commands** for structured development:
+After running `nightlife init`, your AI coding agent will have access to the following skills. Invoke them by telling your agent what you need — it picks the right skill automatically — or reference the skill by name explicitly.
 
-> **💡 Automatic Commits:** All commands automatically generate semantic commit messages and commit their changes upon completion, maintaining a clear project history without manual intervention.
+**Core Workflow:**
 
-| Command                  | Description                                                           | Auto Commit Prefix |
-| -------------------------- | ----------------------------------------------------------------------- |--------------------|
-| `/nightlife.set-ground-rules`      | Create or update project governing principles and development guidelines (Greenfield) | `docs:` |
-| `/nightlife.assess-context` | Analyze existing codebase to understand architecture, patterns, and conventions (Brownfield) | `docs:` |
-| `/nightlife.specify`       | Define what you want to build (requirements and user stories)        | `docs:` |
-| `/nightlife.clarify`       | Clarify underspecified areas through structured questioning (recommended after `/nightlife.specify`) | `docs:` |
-| `/nightlife.architect`         | Create comprehensive system architecture documentation for the entire product | `docs:` |
-| `/nightlife.standardize`       | Create comprehensive coding standards and conventions documentation | `docs:` |
-| `/nightlife.design`        | Create technical implementation plans with your chosen tech stack     | `docs:` |
-| `/nightlife.taskify`       | Generate actionable task lists for implementation                     | `docs:` |
-| `/nightlife.analyze`       | Cross-artifact consistency & coverage analysis (run after `/nightlife.taskify`, before `/nightlife.implement`) | `docs:` |
-| `/nightlife.implement`     | Execute all tasks to build the feature according to the plan         | `feat:`, `fix:`, `test:` (context-dependent) |
-| `/nightlife.design-e2e-test`   | Design comprehensive end-to-end test specifications for the entire product | `test:` |
-| `/nightlife.perform-e2e-test`  | Execute end-to-end tests and generate detailed test result reports | `test:` |
-| `/nightlife.checklist`     | Generate custom quality checklists that validate requirements completeness, clarity, and consistency | `docs:` |
-| `/nightlife.tasks-to-issues` | Convert existing tasks into actionable GitHub issues with dependency tracking | `chore:` |
-| `/nightlife.tasks-to-ado`  | Convert existing tasks into actionable Azure DevOps work items with dependency tracking | `chore:` |
+| Skill | Description |
+| ------- | ------------- |
+| `gen-project-ground-rules-setup` | Create or update project governing principles and development guidelines (Greenfield) |
+| `gen-codebase-assessment` | Analyze existing codebase to understand architecture and patterns (Brownfield) |
+| `gen-requirement-development` | Define what you want to build — requirements and user stories |
+| `gen-requirement-clarification` | Clarify underspecified areas through structured questioning |
+| `gen-architecture-design` | Create comprehensive system architecture documentation |
+| `gen-coding-standards` | Create coding standards and conventions documentation |
+| `gen-technical-detailed-design` | Create technical implementation plans with your chosen tech stack |
+| `gen-coding-plan` | Generate actionable, dependency-ordered task lists |
+| `gen-project-consistency-analysis` | Cross-artifact consistency and coverage analysis |
+| `gen-code-implementation` | Execute all tasks to build the feature according to the plan |
+
+**Quality & Enhancement:**
+
+| Skill | Description |
+| ------- | ------------- |
+| `gen-code-review` | Review code for quality, simplicity, and maintainability |
+| `gen-security-review` | Review code for security vulnerabilities (OWASP Top 10) |
+| `gen-nextjs-mockup` | Create interactive UI mockups using Next.js and Tailwind CSS |
+| `gen-nuxtjs-mockup` | Create interactive UI mockups using Nuxt and Tailwind CSS |
+| `gen-git-commit` | Generate well-structured conventional commit messages |
 
 ### Environment Variables
 
@@ -443,8 +430,8 @@ flowchart TD
     Start -->|Brand new application| GF[🌱 Greenfield Workflow]
     Start -->|Adding to existing app| BF[🏗️ Brownfield Workflow]
     
-    GF --> GFDesc["<b>Timeline:</b> 2-4 weeks<br/><b>Steps:</b> Set Ground Rules → Specify →<br/>Architect → Standardize →<br/>Design → Taskify → Implement"]
-    BF --> BFDesc["<b>Timeline:</b> 1-2 weeks/feature<br/><b>Steps:</b> Assess Context →<br/>Set Ground Rules → Specify → Design → Implement"]
+    GF --> GFDesc["<b>Timeline:</b> 2-4 weeks<br/><b>Skills:</b> ground-rules-setup → requirement-development →<br/>architecture-design → coding-standards →<br/>technical-detailed-design → coding-plan → code-implementation"]
+    BF --> BFDesc["<b>Timeline:</b> 1-2 weeks/feature<br/><b>Skills:</b> codebase-assessment →<br/>ground-rules-setup → requirement-development → technical-detailed-design → code-implementation"]
     
     style GF fill:#90EE90
     style BF fill:#87CEEB
@@ -467,43 +454,22 @@ flowchart TD
 
 ### Project Setup
 
-You can use the Nightlife CLI to bootstrap your project, which will bring in the required artifacts in your environment. Run:
+Bootstrap your project with the Nightlife CLI:
 
 ```bash
-nightlife init <project_name>
-```
-
-Or initialize in the current directory:
-
-```bash
-nightlife init .
-# or use the --here flag
-nightlife init --here
-# Skip confirmation when the directory already has files
-nightlife init . --force
-# or
-nightlife init --here --force
-
 nightlife init <project_name> --ai claude
 nightlife init <project_name> --ai gemini
 nightlife init <project_name> --ai copilot
 
-# Or in current directory:
+# Initialize in current directory
 nightlife init . --ai claude
-nightlife init . --ai codex
-
-# or use --here flag
 nightlife init --here --ai claude
-nightlife init --here --ai codex
 
 # Force merge into a non-empty current directory
-nightlife init . --force --ai claude
-
-# or
 nightlife init --here --force --ai claude
 ```
 
-The CLI will check if you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, or Amazon Q Developer CLI installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
+Use `--ignore-agent-tools` to skip tool-presence checks:
 
 ```bash
 nightlife init <project_name> --ai claude --ignore-agent-tools
@@ -513,327 +479,149 @@ nightlife init <project_name> --ai claude --ignore-agent-tools
 
 ### 🌱 Greenfield Workflow (New Projects)
 
-For new projects starting from scratch, follow these steps:
-
 #### **STEP 1:** Establish project principles
 
-Go to the project folder and run your AI agent. In our example, we're using `claude`.
+Open your AI agent in the project folder. Nightlife installs agent skills automatically — your agent will pick the right one based on your request.
 
-You will know that things are configured correctly if you see the `/nightlife.set-ground-rules`, `/nightlife.specify`, `/nightlife.design`, `/nightlife.taskify`, and `/nightlife.implement` commands available.
+Use the `gen-project-ground-rules-setup` skill to create governing principles:
 
-The first step should be establishing your project's governing principles using the `/nightlife.set-ground-rules` command. This helps ensure consistent decision-making throughout all subsequent development phases:
+> *"Use the `gen-project-ground-rules-setup` skill. Create principles focused on code quality, testing standards, user experience consistency, and performance requirements."*
 
-```text
-/nightlife.set-ground-rules Create principles focused on code quality, testing standards, user experience consistency, and performance requirements. Include governance for how these principles should guide technical decisions and implementation choices.
-```
-
-This step creates or updates the `docs/ground-rules.md` file with your project's foundational guidelines that the AI agent will reference during specification, planning, and implementation phases.
+This creates or updates `docs/ground-rules.md` with foundational guidelines the agent references in all subsequent steps.
 
 #### **STEP 2:** Create project specifications
 
-With your project principles established, you can now create the functional specifications. Use the `/nightlife.specify` command and then provide the concrete requirements for the project you want to develop.
+Use the `gen-requirement-development` skill. Be explicit about **what** you want to build and **why** — do not focus on tech stack yet:
 
->[!IMPORTANT]
->Be as explicit as possible about *what* you are trying to build and *why*. **Do not focus on the tech stack at this point**.
+> *"Use the `gen-requirement-development` skill. Develop Taskify, a team productivity platform. Users can create projects, add team members, assign tasks, comment, and move tasks between Kanban boards. Start with five predefined users (one product manager, four engineers) and three sample projects. Use standard Kanban columns (To Do, In Progress, In Review, Done). No login required. Task cards support status drag-and-drop, unlimited comments, and user assignment. Assigned tasks are highlighted in a different colour. Users can edit/delete only their own comments."*
 
-An example prompt:
+Once complete, you will have a new specification in `specs/001-<feature-name>/spec.md`.
 
-```text
-Develop Taskify, a team productivity platform. It should allow users to create projects, add team members,
-assign tasks, comment and move tasks between boards in Kanban style. In this initial phase for this feature,
-let's call it "Create Taskify," let's have multiple users but the users will be declared ahead of time, predefined.
-I want five users in two different categories, one product manager and four engineers. Let's create three
-different sample projects. Let's have the standard Kanban columns for the status of each task, such as "To Do,"
-"In Progress," "In Review," and "Done." There will be no login for this application as this is just the very
-first testing thing to ensure that our basic features are set up. For each task in the UI for a task card,
-you should be able to change the current status of the task between the different columns in the Kanban work board.
-You should be able to leave an unlimited number of comments for a particular card. You should be able to, from that task
-card, assign one of the valid users. When you first launch Taskify, it's going to give you a list of the five users to pick
-from. There will be no password required. When you click on a user, you go into the main view, which displays the list of
-projects. When you click on a project, you open the Kanban board for that project. You're going to see the columns.
-You'll be able to drag and drop cards back and forth between different columns. You will see any cards that are
-assigned to you, the currently logged in user, in a different color from all the other ones, so you can quickly
-see yours. You can edit any comments that you make, but you can't edit comments that other people made. You can
-delete any comments that you made, but you can't delete comments anybody else made.
-```
-
-After this prompt is entered, you should see Claude Code kick off the planning and spec drafting process. Claude Code will also trigger some of the built-in scripts to set up the repository.
-
-Once this step is completed, you should have a new branch created (e.g., `001-create-taskify`), as well as a new specification in the `specs/001-create-taskify` directory.
-
-The produced specification should contain a set of user stories and functional requirements, as defined in the template.
-
-At this stage, your project folder contents should resemble the following:
+At this stage your project structure will resemble:
 
 ```text
-├── .<agent-folder>/               # e.g., .claude/commands/
-│   ├── nightlife.specify.md
-│   ├── specify/
-│   │   ├── spec-template.md
-│   │   └── scripts/
-│   │       ├── common.py
-│   │       └── create-new-feature.py
-│   └── ... (other commands)
+├── .<skills-folder>/              # e.g., .claude/skills/
+│   ├── gen-requirement-development/
+│   ├── gen-technical-detailed-design/
+│   └── ... (other skills)
+├── CLAUDE.md
+├── AGENTS.md
 └── specs/
     └── 001-create-taskify/
         └── spec.md
 ```
 
-#### **STEP 3:** Functional specification clarification (required before planning)
+#### **STEP 3:** Clarify requirements
 
-With the baseline specification created, you can go ahead and clarify any of the requirements that were not captured properly within the first shot attempt.
+Run `gen-requirement-clarification` before planning to reduce downstream rework:
 
-You should run the structured clarification workflow **before** creating a technical plan to reduce rework downstream.
+> *"Use the `gen-requirement-clarification` skill. Focus on edge cases, data validation, and user experience details."*
 
-Preferred order:
+If you intentionally want to skip clarification (e.g., spike or exploratory prototype), tell the agent so it doesn't block on missing information.
 
-1. Use `/nightlife.clarify` (structured) – sequential, coverage-based questioning that records answers in a Clarifications section.
-2. Optionally follow up with ad-hoc free-form refinement if something still feels vague.
+Ask the agent to validate the **Review & Acceptance Checklist** once clarification is complete:
 
-If you intentionally want to skip clarification (e.g., spike or exploratory prototype), explicitly state that so the agent doesn't block on missing clarifications.
-
-Example free-form refinement prompt (after `/nightlife.clarify` if still needed):
-
-```text
-For each sample project or project that you create there should be a variable number of tasks between 5 and 15
-tasks for each one randomly distributed into different states of completion. Make sure that there's at least
-one task in each stage of completion.
-```
-
-You should also ask Claude Code to validate the **Review & Acceptance Checklist**, checking off the things that are validated/pass the requirements, and leave the ones that are not unchecked. The following prompt can be used:
-
-```text
-Read the review and acceptance checklist, and check off each item in the checklist if the feature spec meets the criteria. Leave it empty if it does not.
-```
-
-It's important to use the interaction with Claude Code as an opportunity to clarify and ask questions around the specification - **do not treat its first attempt as final**.
+> *"Read the review and acceptance checklist, and check off each item if the spec meets the criteria. Leave unchecked items empty."*
 
 #### **STEP 4:** Generate a technical detailed design
 
-You can now be specific about the tech stack and other technical requirements. You can use the `/nightlife.design` command that is built into the project template with a prompt like this:
+Use `gen-technical-detailed-design` to specify **how** to build it (tech stack and architecture):
 
-```text
-We are going to generate this using .NET Aspire, using Postgres as the database. The frontend should use
-Blazor server with drag-and-drop task boards, real-time updates. There should be a REST API created with a projects API,
-tasks API, and a notifications API.
-```
+> *"Use the `gen-technical-detailed-design` skill. Use .NET Aspire with Postgres. Frontend: Blazor server with drag-and-drop task boards and real-time updates. Create REST APIs for projects, tasks, and notifications."*
 
-The output of this step will include a number of implementation detail documents, with your directory tree resembling this:
+Output will include `design.md`, `research.md`, `data-model.md`, and API contracts inside `specs/001-create-taskify/`.
 
-```text
-.
-├── CLAUDE.md
-├── docs/
-│  └── ground-rules.md
-├── specs/
-│  └── 001-create-taskify/
-│      ├── contracts/
-│      │  ├── api-spec.json
-│      │  └── signalr-spec.md
-│      ├── data-model.md
-│      ├── design.md
-│      ├── quickstart.md
-│      ├── research.md
-│      └── spec.md
-└── .<agent-folder>/               # e.g., .claude/commands/
-    ├── nightlife.*.md             # Slash commands
-    ├── <cmd-name>/                # Per-command templates + scripts
-    │   ├── *-template.md
-    │   └── scripts/
-    └── shared-templates/
-```
-
-Check the `research.md` document to ensure that the right tech stack is used, based on your instructions. You can ask Claude Code to refine it if any of the components stand out, or even have it check the locally-installed version of the platform/framework you want to use (e.g., .NET).
-
-Additionally, you might want to ask Claude Code to research details about the chosen tech stack if it's something that is rapidly changing (e.g., .NET Aspire, JS frameworks), with a prompt like this:
-
-```text
-I want you to go through the implementation plan and implementation details, looking for areas that could
-benefit from additional research as .NET Aspire is a rapidly changing library. For those areas that you identify that
-require further research, I want you to update the research document with additional details about the specific
-versions that we are going to be using in this Taskify application and spawn parallel research tasks to clarify
-any details using research from the web.
-```
-
-During this process, you might find that Claude Code gets stuck researching the wrong thing - you can help nudge it in the right direction with a prompt like this:
-
-```text
-I think we need to break this down into a series of steps. First, identify a list of tasks
-that you would need to do during implementation that you're not sure of or would benefit
-from further research. Write down a list of those tasks. And then for each one of these tasks,
-I want you to spin up a separate research task so that the net results is we are researching
-all of those very specific tasks in parallel. What I saw you doing was it looks like you were
-researching .NET Aspire in general and I don't think that's gonna do much for us in this case.
-That's way too untargeted research. The research needs to help you solve a specific targeted question.
-```
+Check `research.md` to confirm the right tech stack is used. Ask the agent to refine it if any components are unclear or outdated.
 
 >[!NOTE]
->Claude Code might be over-eager and add components that you did not ask for. Ask it to clarify the rationale and the source of the change.
+>Agents can be over-eager and add components you didn't ask for. Ask for rationale before accepting additions.
 
-#### **STEP 5:** Have Claude Code validate the plan
+#### **STEP 5:** Validate the plan
 
-With the plan in place, you should have Claude Code run through it to make sure that there are no missing pieces. You can use a prompt like this:
+Ask the agent to audit the implementation plan for gaps and missing sequences:
 
-```text
-Now I want you to go and audit the implementation plan and the implementation detail files.
-Read through it with an eye on determining whether or not there is a sequence of tasks that you need
-to be doing that are obvious from reading this. Because I don't know if there's enough here. For example,
-when I look at the core implementation, it would be useful to reference the appropriate places in the implementation
-details where it can find the information as it walks through each step in the core implementation or in the refinement.
-```
+> *"Audit the implementation plan and detail files. Identify any obvious task sequences that are missing or under-specified, and refine accordingly."*
 
-This helps refine the implementation plan and helps you avoid potential blind spots that Claude Code missed in its planning cycle. Once the initial refinement pass is complete, ask Claude Code to go through the checklist once more before you can get to the implementation.
+Before implementation, also ask the agent to cross-check for over-engineered pieces and ensure alignment with ground rules.
 
-You can also ask Claude Code (if you have the [GitHub CLI](https://docs.github.com/en/github-cli/github-cli) installed) to go ahead and create a pull request from your current branch to `main` with a detailed description, to make sure that the effort is properly tracked.
+#### **STEP 6:** Generate task breakdown
 
->[!NOTE]
->Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [ground rules](base/docs/ground-rules.md) as the foundational piece that it must adhere to when establishing the plan.
+Use `gen-coding-plan` to produce a dependency-ordered `tasks.md`:
 
-#### **STEP 6:** Generate task breakdown with /nightlife.taskify
+> *"Use the `gen-coding-plan` skill."*
 
-With the implementation plan validated, you can now break down the plan into specific, actionable tasks that can be executed in the correct order. Use the `/nightlife.taskify` command to automatically generate a detailed task breakdown from your implementation plan:
+The generated `tasks.md` contains tasks organized by user story, dependency ordering, parallel execution markers (`[P]`), file path specs, and TDD checkpoints.
 
-```text
-/nightlife.taskify
-```
+#### **STEP 7:** Implement
 
-This step creates a `tasks.md` file in your feature specification directory that contains:
+Use `gen-code-implementation` to execute all tasks in order:
 
-- **Task breakdown organized by user story** - Each user story becomes a separate implementation phase with its own set of tasks
-- **Dependency management** - Tasks are ordered to respect dependencies between components (e.g., models before services, services before endpoints)
-- **Parallel execution markers** - Tasks that can run in parallel are marked with `[P]` to optimize development workflow
-- **File path specifications** - Each task includes the exact file paths where implementation should occur
-- **Test-driven development structure** - If tests are requested, test tasks are included and ordered to be written before implementation
-- **Checkpoint validation** - Each user story phase includes checkpoints to validate independent functionality
+> *"Use the `gen-code-implementation` skill."*
 
-The generated tasks.md provides a clear roadmap for the `/nightlife.implement` command, ensuring systematic implementation that maintains code quality and allows for incremental delivery of user stories.
-
-#### **STEP 7:** Implementation
-
-Once ready, use the `/nightlife.implement` command to execute your implementation plan:
-
-```text
-/nightlife.implement
-```
-
-The `/nightlife.implement` command will:
-
-- Validate that all prerequisites are in place (ground-rules, spec, plan, and tasks)
-- Parse the task breakdown from `tasks.md`
-- Execute tasks in the correct order, respecting dependencies and parallel execution markers
-- Follow the TDD approach defined in your task plan
-- Provide progress updates and handle errors appropriately
+The skill validates prerequisites (ground-rules, spec, plan, tasks), executes tasks respecting dependencies, and follows the TDD approach defined in your plan.
 
 >[!IMPORTANT]
->The AI agent will execute local CLI commands (such as `dotnet`, `npm`, etc.) - make sure you have the required tools installed on your machine.
+>The agent will run local CLI commands (`dotnet`, `npm`, etc.) — ensure required tools are installed.
 
-Once the implementation is complete, test the application and resolve any runtime errors that may not be visible in CLI logs (e.g., browser console errors). You can copy and paste such errors back to your AI agent for resolution.
+Once complete, test the application and paste any runtime errors back to your agent for resolution.
 
 ---
 
 ### 🏗️ Brownfield Workflow (Existing Projects)
 
-For adding new features to existing codebases, follow this streamlined workflow:
-
 #### **STEP 1:** Assess existing codebase
 
-Start by analyzing the existing codebase to understand its architecture, patterns, and conventions:
+Use `gen-codebase-assessment` to understand the existing architecture, patterns, and conventions:
 
-```text
-/nightlife.assess-context
-```
+> *"Use the `gen-codebase-assessment` skill."*
 
-This command performs a comprehensive analysis of your codebase and creates `docs/context-assessment.md` that documents:
-
-- **Technology Stack** - Languages, frameworks, libraries, and tools in use
-- **Project Structure** - Directory organization and architectural layers
-- **Architecture Patterns** - Design patterns, component relationships, and communication patterns
-- **Coding Conventions** - Naming conventions, file organization, and code quality practices
-- **Data Layer** - ORM/query patterns, schema design, and data access patterns
-- **API Patterns** - Endpoint structure, authentication, and integration patterns
-- **Testing Strategy** - Test organization, coverage, and testing patterns
-- **Build & Deployment** - Build process, environment configuration, and deployment strategy
-- **Technical Health Score** - Overall assessment with strengths and improvement areas
-- **Feature Integration Readiness** - Guidance for adding new features consistently
+This creates `docs/context-assessment.md` covering: technology stack, project structure, architecture patterns, coding conventions, data layer, API patterns, testing strategy, and a health score.
 
 >[!NOTE]
->The context assessment serves as the foundation for all subsequent steps. It helps ensure that new features integrate seamlessly with existing patterns and maintain codebase consistency.
+>The context assessment is the foundation for all subsequent steps. Keep it updated when significant changes are made to the codebase.
 
 #### **STEP 2:** Update project principles
 
-With the codebase context understood, update or establish project principles that align with the existing architecture:
+Use `gen-project-ground-rules-setup` to align principles with the existing codebase:
 
-```text
-/nightlife.set-ground-rules Review the context assessment and update project principles to align with the existing codebase patterns. 
-Ensure principles cover code quality standards found in the assessment, testing practices currently in use, 
-and architectural decisions that should guide new feature development.
-```
-
-This step creates or updates `docs/ground-rules.md` to reflect:
-
-- Coding standards and conventions discovered in the codebase
-- Architectural patterns and design principles in use
-- Testing practices and quality standards
-- Integration guidelines for maintaining consistency
-
->[!TIP]
->The `/nightlife.set-ground-rules` command in brownfield projects should reference the context assessment to ensure principles align with existing practices rather than imposing new ones.
+> *"Use the `gen-project-ground-rules-setup` skill. Review the context assessment and update project principles to align with existing patterns, testing practices, and architectural decisions."*
 
 #### **STEP 3:** Create feature specification
 
-With both the codebase context and updated principles established, specify the new feature you want to add:
+Use `gen-requirement-development` for the new feature:
 
-```text
-/nightlife.specify Add a user notification system that sends email alerts when tasks are assigned. 
-Users can configure notification preferences (immediate, daily digest, or disabled) in their profile settings.
-```
+> *"Use the `gen-requirement-development` skill. Add a user notification system that sends email alerts when tasks are assigned. Users can configure notification preferences (immediate, daily digest, or disabled) in their profile settings."*
 
-The AI agent will reference the context assessment and updated principles to ensure the specification aligns with existing patterns and architecture.
+The agent references the context assessment and ground rules to ensure the spec aligns with existing patterns.
 
 #### **STEP 4:** Clarify requirements
 
-Use the clarification workflow to refine the specification:
+Use `gen-requirement-clarification` to define all edge cases and integration points:
 
-```text
-/nightlife.clarify
-```
-
-This ensures all edge cases and integration points with the existing system are properly defined.
+> *"Use the `gen-requirement-clarification` skill."*
 
 #### **STEP 5:** Design integration plan
 
-Create a technical plan that integrates with the existing architecture:
+Use `gen-technical-detailed-design` to plan integration with the existing architecture:
 
-```text
-/nightlife.design Follow the existing email service pattern identified in the context assessment. 
-Use the current user preference storage approach. Integrate with the existing task assignment workflow.
-```
-
-The plan will reference existing components, patterns, and conventions from the context assessment.
+> *"Use the `gen-technical-detailed-design` skill. Follow the existing email service pattern from the context assessment. Use the current user preference storage approach."*
 
 #### **STEP 6:** Generate task breakdown
 
-Break down the implementation into specific tasks:
+Use `gen-coding-plan` to produce tasks that integrate with existing code:
 
-```text
-/nightlife.taskify
-```
-
-Tasks will be organized to integrate with existing code while maintaining consistency with established patterns.
+> *"Use the `gen-coding-plan` skill."*
 
 #### **STEP 7:** Implement the feature
 
-Execute the implementation plan:
+Use `gen-code-implementation` to build the feature following established conventions:
 
-```text
-/nightlife.implement
-```
-
-The AI agent will build the feature following existing coding conventions and integration patterns identified in the context assessment and established principles.
+> *"Use the `gen-code-implementation` skill."*
 
 #### **STEP 8:** Test and validate
 
-Test the new feature in the context of the existing application. Ensure it integrates properly with existing functionality and doesn't break existing workflows.
+Test the new feature in the context of the existing application and verify it doesn't break existing workflows.
+
 </details>
 
 ---

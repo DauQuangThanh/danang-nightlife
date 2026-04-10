@@ -37,7 +37,7 @@ This skill guides you through a structured implementation planning workflow to c
 - Feature specification or requirements document available
 - Templates provided with this skill (in `templates/` directory)
 - Bash 4.0+ (macOS/Linux/WSL) or PowerShell 5.1+ (Windows) for setup script
-- Git repository with feature branch (format: `N-feature-name`, e.g., `1-user-authentication`)
+- Git repository with feature branch (format: `N-feature-name`, e.g., `001-user-authentication`)
 - Feature directory at `specs/N-feature-name/` with `spec.md` file
 
 **Optional (workspace-level enhancements):**

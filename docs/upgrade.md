@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-> You have Danang Nightlife installed and want to upgrade to the latest version to get new features, bug fixes, or updated slash commands. This guide covers both upgrading the CLI tool and updating your project files.
+> You have Danang Nightlife installed and want to upgrade to the latest version to get new features, bug fixes, or updated agent skills. This guide covers both upgrading the CLI tool and updating your project files.
 
 ---
 
@@ -44,14 +44,13 @@ This shows installed tools and confirms the CLI is working.
 
 ## Part 2: Updating Project Files
 
-When Danang Nightlife releases new features (like new slash commands or updated templates), you need to refresh your project's Danang Nightlife files.
+When Danang Nightlife releases new features (like new agent skills, subagents, or updated templates), you need to refresh your project's Danang Nightlife files.
 
 ### What gets updated?
 
 Running `nightlife init --here --force --upgrade` will automatically back up and replace:
 
-- ✅ **Agent folders** (e.g., .claude/, .github/, .cursor/) — entire root folders are backed up and replaced (commands, per-command templates, and scripts are all self-contained inside these folders)
-- ✅ **Skills folder** (for Jules agent) - backed up if present
+- ✅ **Agent folders** (e.g., `.claude/`, `.github/`, `.cursor/`) — entire root folders are backed up and replaced (skills, subagents, and shared assets are all self-contained inside these folders)
 
 **Automatic backups are created with timestamps** (e.g., `.claude.backup.20260204_120000`). User project files (specs/, source code, etc.) are preserved and never touched.
 
@@ -142,17 +141,17 @@ Restart your IDE to refresh the command list.
 
 ## Common Scenarios
 
-### Scenario 1: "I just want new slash commands"
+### Scenario 1: "I just want new agent skills"
 
 ```bash
 # Upgrade CLI (if using persistent install)
 uv tool install nightlife-cli --force --from git+https://github.com/dauquangthanh/danang-nightlife.git
 
-# Update project files to get new commands (automatic backups created)
+# Update project files to get new skills (automatic backups created)
 nightlife init --here --force --upgrade --ai copilot
 ```
 
-### Scenario 2: "I customized templates"
+### Scenario 2: "I customized skill templates"
 
 ```bash
 # Upgrade CLI
@@ -161,9 +160,9 @@ uv tool install nightlife-cli --force --from git+https://github.com/dauquangthan
 # Update project (automatic backups created, e.g., .github.backup.TIMESTAMP)
 nightlife init --here --force --upgrade --ai copilot
 
-# Restore customized templates from backup
-cp -r .github.backup.*/agents/specify .github/agents/
-# Manually merge template changes if needed
+# Restore customized skill files from backup
+cp -r .github.backup.*/skills/gen-requirement-development .github/skills/
+# Manually merge any custom changes if needed
 ```
 
 ### Scenario 3: "I see duplicate slash commands in my IDE"

@@ -38,13 +38,21 @@ build_template_package() {
     exit 1
   fi
 
-  # Copy agent-commands directory
-  if [[ -d agent-commands ]]; then
-    cp -r agent-commands "$base_dir/agent-commands"
-    echo "Copied agent-commands -> $base_dir/agent-commands"
+  # Copy agents directory (subagent definitions)
+  if [[ -d agents ]]; then
+    cp -r agents "$base_dir/agents"
+    echo "Copied agents -> $base_dir/agents"
   else
-    echo "Warning: agent-commands directory not found, creating empty"
-    mkdir -p "$base_dir/agent-commands"
+    echo "Warning: agents directory not found, creating empty"
+    mkdir -p "$base_dir/agents"
+  fi
+
+  # Copy templates directory
+  if [[ -d templates ]]; then
+    cp -r templates "$base_dir/templates"
+    echo "Copied templates -> $base_dir/templates"
+  else
+    echo "Warning: templates directory not found"
   fi
 
   # Create the zip file

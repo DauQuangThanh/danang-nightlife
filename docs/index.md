@@ -38,27 +38,34 @@ For decades, we treated specifications as throwaway notes—just a formality bef
 
 ---
 
-## 🎯 Available Commands
+## 🎯 Available Agent Skills
 
-After installation, you'll have access to these slash commands in your AI assistant:
+After installation, your AI assistant has access to these skills. Tell it what you need and it picks the right skill automatically, or reference the skill by name explicitly.
 
-| Command | Purpose |
-| --------- | ---------- |
-| `/nightlife.set-ground-rules` | Set project principles and ground rules (Greenfield) |
-| `/nightlife.assess-context` | Analyze existing codebase (Brownfield alternative to set-ground-rules) |
-| `/nightlife.specify` | Define requirements and user stories |
-| `/nightlife.clarify` | Clarify underspecified areas through structured questioning |
-| `/nightlife.architect` | Design system architecture with C4 diagrams |
-| `/nightlife.standardize` | Create coding standards and conventions |
-| `/nightlife.design` | Create technical detailed design (implementation plans) |
-| `/nightlife.taskify` | Break down into actionable tasks |
-| `/nightlife.analyze` | Check consistency across specifications |
-| `/nightlife.implement` | Execute all tasks and build the feature |
-| `/nightlife.design-e2e-test` | Design end-to-end test specifications |
-| `/nightlife.perform-e2e-test` | Execute end-to-end tests |
-| `/nightlife.checklist` | Generate quality validation checklists |
-| `/nightlife.tasks-to-issues` | Convert tasks to GitHub issues |
-| `/nightlife.tasks-to-ado` | Convert tasks to Azure DevOps work items |
+**Core Workflow:**
+
+| Skill | Purpose |
+| ------- | ---------- |
+| `gen-project-ground-rules-setup` | Set project principles and ground rules (Greenfield) |
+| `gen-codebase-assessment` | Analyze existing codebase (Brownfield) |
+| `gen-requirement-development` | Define requirements and user stories |
+| `gen-requirement-clarification` | Clarify underspecified areas through structured questioning |
+| `gen-architecture-design` | Design system architecture with C4 diagrams |
+| `gen-coding-standards` | Create coding standards and conventions |
+| `gen-technical-detailed-design` | Create technical implementation plans |
+| `gen-coding-plan` | Break down into actionable tasks |
+| `gen-project-consistency-analysis` | Check consistency across specifications |
+| `gen-code-implementation` | Execute all tasks and build the feature |
+
+**Quality & Enhancement:**
+
+| Skill | Purpose |
+| ------- | ---------- |
+| `gen-code-review` | Review code for quality and maintainability |
+| `gen-security-review` | Review code for security vulnerabilities |
+| `gen-nextjs-mockup` | Create interactive UI mockups with Next.js |
+| `gen-nuxtjs-mockup` | Create interactive UI mockups with Nuxt |
+| `gen-git-commit` | Generate conventional commit messages |
 
 ---
 
