@@ -1,0 +1,24 @@
+# DaNang Nightlife - Agent & Skill Repository Configuration
+# URLs can point to GitHub issues or Azure DevOps repo files containing
+# YAML-formatted lists of agent and skill repositories.
+# Supported formats:
+#   GitHub issue:      https://github.com/{owner}/{repo}/issues/{number}
+#   Azure DevOps file: https://dev.azure.com/{org}/{project}/_git/{repo}?path={path}&version=GB{branch}
+agents:
+  #- name: DaNangNightlifeAgent
+  #  url: https://github.com/DauQuangThanh/danang-nightlife
+  #  branch: main
+  #  path: agents
+  - name: VinhPhoenixAgent
+    url: https://github.com/DauQuangThanh/vinh-phoenix
+    branch: main
+    path: agents
+skills:
+  #- name: DaNangNightlifeSkill
+  #  url: https://github.com/DauQuangThanh/danang-nightlife
+  #  branch: main
+  #  path: skills
+  - name: VinhPhoenixSkill
+    url: https://github.com/DauQuangThanh/vinh-phoenix
+    branch: main
+    path: skills 

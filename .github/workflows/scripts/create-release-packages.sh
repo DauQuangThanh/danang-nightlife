@@ -55,6 +55,13 @@ build_template_package() {
     echo "Warning: templates directory not found"
   fi
 
+  # Copy nightlife.yaml from templates to package root (so copy_local_template can find it)
+  if [[ -f templates/nightlife.yaml ]]; then
+    echo "nightlife.yaml included in templates/"
+  else
+    echo "Warning: templates/nightlife.yaml not found - nightlife.yaml will not be created during init"
+  fi
+
   # Create the zip file with explicit contents (avoid hidden files)
   local zip_args=()
   [[ -d "$base_dir/skills" ]] && zip_args+=(skills)

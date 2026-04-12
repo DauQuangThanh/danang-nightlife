@@ -170,6 +170,33 @@ def copy_local_template(
             if verbose and not tracker:
                 console.print(f"[green]✓[/green] Created {agent_doc_file}")
 
+    # Copy nightlife.yaml to project root if it doesn't exist
+    nightlife_yaml_template = source_path / "templates" / "nightlife.yaml"
+    nightlife_yaml_dest = project_path / "nightlife.yaml"
+    if not nightlife_yaml_dest.exists():
+        if nightlife_yaml_template.exists():
+            shutil.copy2(nightlife_yaml_template, nightlife_yaml_dest)
+            if verbose and not tracker:
+                console.print("[green]✓[/green] Created nightlife.yaml")
+        else:
+            # Fallback: create a minimal nightlife.yaml
+            nightlife_yaml_dest.write_text(
+                "# DaNang Nightlife - Agent & Skill Repository Configuration\n"
+                "agents:\n"
+                "  - name: VinhPhoenixAgent\n"
+                "    url: https://github.com/DauQuangThanh/vinh-phoenix\n"
+                "    branch: main\n"
+                "    path: agents\n"
+                "skills:\n"
+                "  - name: VinhPhoenixSkill\n"
+                "    url: https://github.com/DauQuangThanh/vinh-phoenix\n"
+                "    branch: main\n"
+                "    path: skills\n"
+            )
+            if verbose and not tracker:
+                console.print("[yellow]Warning:[/yellow] nightlife.yaml template not found, created default")
+                console.print("[green]✓[/green] Created nightlife.yaml")
+
     if tracker:
         tracker.complete(f"copy-{ai_assistant}", "templates copied")
 
