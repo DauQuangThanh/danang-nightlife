@@ -314,6 +314,20 @@ nightlife check
 nightlife version
 ```
 
+### Agent Personas
+
+Nightlife includes five specialized subagents that organize skills by role. Each agent has a focused responsibility and a defined workflow for both new work and handling changes. Use them by telling your AI assistant to delegate to the appropriate agent, or invoke them directly by name.
+
+| Agent | Role | Key Skills |
+| ------- | ------ | ------------ |
+| **Business Analyst** | Requirements gathering, spec writing, and requirements updates | `gen-requirement-development`, `gen-requirement-clarification`, `gen-coding-plan`, `gen-project-consistency-analysis` |
+| **System Architect** | System design, C4 diagrams, ADRs, and architecture evolution | `gen-architecture-design`, `gen-technical-detailed-design`, `gen-codebase-assessment`, `gen-coding-standards`, `gen-security-review`, `gen-requirement-clarification`, `gen-project-consistency-analysis` |
+| **Project Manager** | Ground rules, task planning, standards, and plan updates | `gen-project-ground-rules-setup`, `gen-coding-plan`, `gen-coding-standards`, `gen-git-command-guidelines`, `gen-requirement-clarification`, `gen-project-consistency-analysis` |
+| **Developer** | Full-stack implementation, UI mockups, bug fixing, and code review | `gen-code-implementation`, `gen-nextjs-mockup`, `gen-nuxtjs-mockup`, `gen-code-review`, `gen-security-review`, `gen-codebase-assessment`, `gen-git-commit` |
+| **Tester** | Test planning, E2E testing with Playwright, and quality validation | `gen-test-plan`, `gen-code-review`, `gen-security-review`, `gen-project-consistency-analysis` + Playwright MCP |
+
+Each agent includes workflows for both **new work** (creating from scratch) and **change management** (handling requirement additions, modifications, and deletions with impact analysis).
+
 ### Available Agent Skills
 
 After running `nightlife init`, your AI coding agent will have access to the following skills. Invoke them by telling your agent what you need — it picks the right skill automatically — or reference the skill by name explicitly.
@@ -333,15 +347,31 @@ After running `nightlife init`, your AI coding agent will have access to the fol
 | `gen-project-consistency-analysis` | Cross-artifact consistency and coverage analysis |
 | `gen-code-implementation` | Execute all tasks to build the feature according to the plan |
 
-**Quality & Enhancement:**
+**Testing & Quality:**
 
 | Skill | Description |
 | ------- | ------------- |
+| `gen-test-plan` | Create comprehensive test plans with requirements traceability and Playwright E2E scripts |
 | `gen-code-review` | Review code for quality, simplicity, and maintainability |
 | `gen-security-review` | Review code for security vulnerabilities (OWASP Top 10) |
 | `gen-nextjs-mockup` | Create interactive UI mockups using Next.js and Tailwind CSS |
 | `gen-nuxtjs-mockup` | Create interactive UI mockups using Nuxt and Tailwind CSS |
 | `gen-git-commit` | Generate well-structured conventional commit messages |
+| `gen-git-command-guidelines` | Git workflow best practices, branching strategies, and release management |
+
+**Security & Compliance:**
+
+| Skill | Description |
+| ------- | ------------- |
+| `sec-compliance-standards` | GDPR, HIPAA, SOC2, and PCI-DSS compliance checks and audit readiness |
+| `sec-ip-protection` | Code origin verification, license scanning, and IP contamination prevention |
+
+**Tooling & Meta:**
+
+| Skill | Description |
+| ------- | ------------- |
+| `gen-agent-skill-creation` | Create and validate new agent skills following the Agent Skills specification |
+| `gen-update-agent-file` | Generate and update CLAUDE.md and AGENTS.md based on project state |
 
 ### Environment Variables
 
@@ -632,28 +662,49 @@ After running `nightlife init`, your project will have the following structure:
 
 ```
 <project-root>/
-├── .<agent-folder>/       # Agent commands (self-contained, managed by Nightlife CLI)
-│   │                      # e.g., .claude/commands/, .github/agents/, .cursor/commands/
-│   ├── nightlife.*.md     # 15 Nightlife slash commands for your AI agent
-│   ├── <cmd-name>/        # Per-command templates and scripts
-│   │   ├── *-template.md  # Command-specific templates
-│   │   └── scripts/       # Command automation scripts (Python)
-│   └── shared-templates/  # Shared assets used across commands
+├── agents/                # Agent persona definitions (5 subagents)
+│   ├── business-analyst.md
+│   ├── system-architect.md
+│   ├── project-manager.md
+│   ├── developer.md
+│   └── tester.md
 │
-└── specs/                 # Your feature specifications (created as you work)
-    └── <feature-name>/
-        ├── spec.md        # Requirements and user stories
-        ├── design.md      # Technical detailed design (implementation plan)
-        ├── tasks.md       # Task breakdown for execution
-        └── research.md    # Tech stack research notes
+├── skills/                # Shared agent skills (21 skills)
+│   ├── gen-*/             # Core workflow and quality skills
+│   └── sec-*/             # Security and compliance skills
+│
+├── .<agent-folder>/       # Agent-specific configuration
+│   │                      # e.g., .claude/, .github/agents/, .cursor/
+│   └── skills/            # Agent-specific skills
+│
+├── docs/                  # Project documentation
+│   ├── ground-rules.md    # Project principles (created by PM agent)
+│   ├── architecture.md    # System architecture (created by Architect agent)
+│   ├── standards.md       # Coding standards (created by Architect/PM agents)
+│   └── context-assessment.md  # Codebase assessment (Brownfield)
+│
+├── specs/                 # Feature specifications (created as you work)
+│   └── <feature-name>/
+│       ├── spec.md        # Requirements and user stories
+│       ├── design.md      # Technical detailed design
+│       ├── tasks.md       # Task breakdown for execution
+│       ├── test-plan.md   # Test plan with traceability matrix
+│       ├── e2e-test-plan.md   # Playwright E2E test plan
+│       ├── research.md    # Tech stack research notes
+│       ├── data-model.md  # Entity definitions
+│       └── contracts/     # API contracts
+│
+└── templates/             # Agent file templates
 ```
 
 **Key Folders:**
 
-- **`.<agent>/`** - AI agent commands, templates, and scripts — fully self-contained (`.claude/`, `.github/agents/`, `.cursor/commands/`, etc.)
-- **`specs/`** - Your feature specifications (grows as you build)
+- **`agents/`** - Subagent personas that organize skills by role (Business Analyst, System Architect, Project Manager, Developer, Tester)
+- **`skills/`** - Shared agent skills (21 skills) used across all agents and AI platforms
+- **`specs/`** - Feature specifications (grows as you build)
+- **`docs/`** - Product-level documentation generated by agents
 
-**Note:** Agent folders are auto-managed by the Nightlife CLI. You primarily work in `specs/` for your features.
+**Note:** Agent and skill folders are managed by the Nightlife CLI. You primarily work in `specs/` for features and `docs/` for product-level decisions.
 
 ---
 

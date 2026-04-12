@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /Users/thanhdq.coe/97-vinh-phoenix/danang-nightlife/skills/gen-test-plan/scripts/check-prerequisites.sh)",
+      "Bash(ls /Users/thanhdq.coe/97-vinh-phoenix/danang-nightlife/skills/sec-*/SKILL.md)"
+    ]
+  }
+}

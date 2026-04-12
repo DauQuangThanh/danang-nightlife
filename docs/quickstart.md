@@ -1,30 +1,45 @@
-# ⚡ Quick Start Guide
+# Quick Start Guide
 
-**Build your first project with Spec-Driven Development in 9 steps.**
+**Build your first project with Spec-Driven Development in 10 steps.**
 
 ---
 
-## 🎯 The Workflow
+## The Workflow
 
 Follow this order for best results. Tell your AI agent what you want to do and it will automatically pick the right skill — or reference the skill by name explicitly.
 
-| Step | Skill | Purpose |
-| ------ | ------- | --------- |
-| 1️⃣ | `gen-project-ground-rules-setup` | Set ground rules (or `gen-codebase-assessment` for existing projects) |
-| 2️⃣ | `gen-requirement-development` | Define requirements |
-| 3️⃣ | `gen-requirement-clarification` | Clarify unclear requirements |
-| 4️⃣ | `gen-architecture-design` | Design system architecture *(optional, product-level)* |
-| 5️⃣ | `gen-coding-standards` | Create coding standards *(optional, product-level)* |
-| 6️⃣ | `gen-technical-detailed-design` | Create implementation plan |
-| 7️⃣ | `gen-coding-plan` | Break down into tasks |
-| 8️⃣ | `gen-project-consistency-analysis` | Validate consistency and coverage |
-| 9️⃣ | `gen-code-implementation` | Build it! |
+| Step | Skill | Agent | Purpose |
+| ------ | ------- | ------- | --------- |
+| 1 | `gen-project-ground-rules-setup` | Project Manager | Set ground rules (or `gen-codebase-assessment` for existing projects) |
+| 2 | `gen-requirement-development` | Business Analyst | Define requirements and user stories |
+| 3 | `gen-requirement-clarification` | Business Analyst | Clarify unclear requirements |
+| 4 | `gen-architecture-design` | System Architect | Design system architecture *(optional, product-level)* |
+| 5 | `gen-coding-standards` | Project Manager | Create coding standards *(optional, product-level)* |
+| 6 | `gen-technical-detailed-design` | System Architect | Create implementation plan |
+| 7 | `gen-coding-plan` | Project Manager | Break down into tasks |
+| 8 | `gen-project-consistency-analysis` | Business Analyst | Validate consistency and coverage |
+| 9 | `gen-code-implementation` | Developer | Build it! |
+| 10 | `gen-test-plan` | Tester | Plan and execute tests |
 
-> **💡 Smart Context:** Nightlife automatically detects your active feature from your Git branch (like `001-feature-name`). To work on different features, just switch branches.
+> **Smart Context:** Nightlife automatically detects your active feature from your Git branch (like `001-feature-name`). To work on different features, just switch branches.
+
+### Agent Personas
+
+Nightlife organizes skills into five agent personas. Each handles a specific part of the development lifecycle:
+
+| Agent | Responsibility |
+| ------- | ---------------- |
+| **Business Analyst** | Requirements gathering, spec writing, clarification, and change management |
+| **System Architect** | System design, C4 diagrams, ADRs, technical designs, and architecture evolution |
+| **Project Manager** | Ground rules, task planning, coding standards, and plan updates |
+| **Developer** | Full-stack implementation, UI mockups, bug fixing, and code review |
+| **Tester** | Test planning, E2E testing with Playwright, security review, and quality gates |
+
+You can invoke skills directly or tell your AI assistant to delegate to the appropriate agent.
 
 ---
 
-## 🚀 Let's Build Something
+## Let's Build Something
 
 ### Step 1: Install Nightlife
 
@@ -110,7 +125,49 @@ Now specify **how** to build it (tech stack and architecture):
 
 ---
 
-## 📖 Complete Example: Building Taskify
+### Step 9: Plan and Execute Tests
+
+**Create test plan:**
+
+> *"Use the `gen-test-plan` skill. Create a comprehensive test plan with E2E scenarios."*
+
+**What this does:** Generates `test-plan.md` (traceability matrix mapping every requirement to test scenarios) and `e2e-test-plan.md` (Playwright-ready E2E test scripts).
+
+**Run E2E tests:** Use the Playwright MCP server to automate browser testing, or execute Playwright scripts directly in CI/CD.
+
+---
+
+### Step 10: Review and Ship
+
+**Code review:**
+
+> *"Use the `gen-code-review` skill."*
+
+**Security review:**
+
+> *"Use the `gen-security-review` skill."*
+
+**Commit:**
+
+> *"Use the `gen-git-commit` skill."*
+
+---
+
+## Handling Requirement Changes
+
+When requirements change during development, each agent has a structured workflow to handle updates safely:
+
+1. **Business Analyst** confirms the change, assesses impact on specs, updates requirements, and flags downstream artifacts
+2. **System Architect** evaluates architecture impact, updates C4 diagrams and ADRs, revises feature designs
+3. **Project Manager** maps task impact, preserves completed work, updates plans, and communicates the delta
+4. **Developer** fixes bugs with root cause analysis, or implements new tasks from updated plans
+5. **Tester** updates test plans and E2E scenarios to reflect changed requirements
+
+Each agent validates consistency after updates using `gen-project-consistency-analysis`.
+
+---
+
+## Complete Example: Building Taskify
 
 **Project:** A team productivity platform with Kanban boards.
 
@@ -130,15 +187,17 @@ Now specify **how** to build it (tech stack and architecture):
 
 > *"Use the `gen-technical-detailed-design` skill. Use .NET Aspire with Postgres database. Frontend: Blazor server with drag-and-drop and real-time updates. Create REST APIs for projects, tasks, and notifications."*
 
-### 5. Validate and Build
+### 5. Validate, Build, and Test
 
 > *"Use the `gen-project-consistency-analysis` skill."*
 
 > *"Use the `gen-code-implementation` skill."*
 
+> *"Use the `gen-test-plan` skill. Create E2E tests for all Kanban board interactions."*
+
 ---
 
-## 🎯 Key Principles
+## Key Principles
 
 | Principle | What It Means |
 | ----------- | --------------- |
@@ -146,19 +205,20 @@ Now specify **how** to build it (tech stack and architecture):
 | **Skip Tech Early** | Don't worry about tech stack during specification |
 | **Iterate** | Refine specs before implementation |
 | **Validate First** | Check the plan before coding |
+| **Test Thoroughly** | Create test plans with requirement traceability |
 | **Let AI Work** | Trust the agent to handle implementation details |
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 **Learn more:**
 
-- 📖 [Installation Guide](installation.md) - Detailed setup options
-- 🔍 [Upgrade Guide](upgrade.md) - Update to the latest version
-- 💻 [Source Code](https://github.com/dauquangthanh/danang-nightlife) - Contribute to the project
+- [Installation Guide](installation.md) - Detailed setup options
+- [Upgrade Guide](upgrade.md) - Update to the latest version
+- [Source Code](https://github.com/dauquangthanh/danang-nightlife) - Contribute to the project
 
 **Get help:**
 
-- 🐛 [Report Issues](https://github.com/dauquangthanh/danang-nightlife/issues/new) - Found a bug?
-- 💬 [Ask Questions](https://github.com/dauquangthanh/danang-nightlife/discussions) - Need help?
+- [Report Issues](https://github.com/dauquangthanh/danang-nightlife/issues/new) - Found a bug?
+- [Ask Questions](https://github.com/dauquangthanh/danang-nightlife/discussions) - Need help?
